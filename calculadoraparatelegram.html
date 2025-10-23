@@ -1,154 +1,120 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta name="robots" content="noindex,nofollow">
-<title>Mew Trader_ESP · Calculadora de Precio Promedio & Stop Loss</title>
-
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora — Mew Trader ESP</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0b0f13;--card:#121822;--muted:#7b8aa0;--fg:#e8eef7;--accent:#3aa9ff;--accent-2:#7cffb2;--danger:#ff5a7d}
-*{box-sizing:border-box}html,body{height:100%}
-body{margin:0;font-family:Inter,system-ui,sans-serif;background:linear-gradient(180deg,#0b0f13 0%,#0d1219 100%);color:var(--fg);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:24px}
-header{text-align:center;margin-bottom:30px}
-header h1{font-size:2.6rem;font-weight:900;letter-spacing:1px;margin:0;color:#3aa9ff}
-header img{display:block;margin:20px auto;border-radius:20px;max-width:200px}
-header a{color:#7cffb2;text-decoration:none;font-weight:600}
-.app{width:100%;max-width:980px}
-.title{text-align:center;font-size:clamp(20px,2.6vw,28px);font-weight:800;margin:0 0 14px}
-.subtitle{text-align:center;color:var(--muted);margin:0 0 22px;font-size:14px}
-.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
-.card{grid-column:span 12;background:linear-gradient(180deg,#0f1520 0%,#0e141d 100%);border:1px solid #1a2230;border-radius:16px;padding:18px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
-@media(min-width:860px){.card.half{grid-column:span 6}}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.field{display:flex;flex-direction:column;gap:8px}
-label{font-size:12px;color:var(--muted);letter-spacing:.3px}
-input[type=number]{appearance:textfield}
-input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{appearance:none;margin:0}
-.input{background:#0b111a;border:1px solid #1b2636;border-radius:12px;padding:12px;font-size:14px;color:var(--fg);outline:none;transition:.15s}
-.input:focus{border-color:#2c74ff;box-shadow:0 0 0 3px rgba(60,140,255,.15)}
-.weights{display:flex;gap:8px;flex-wrap:wrap}
-.pill{background:#0c1320;border:1px solid #182235;color:#c6d3e8;border-radius:999px;padding:6px 10px;font-size:12px}
-.result{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1px dashed #223049;border-radius:12px;background:linear-gradient(180deg,#0b1119 0%,#0c1118 100%)}
-.res-title{font-size:12px;color:var(--muted)}
-.res-value{font-variant-numeric:tabular-nums;font-weight:700;letter-spacing:.3px}
-.accent{color:var(--accent)}.bad{color:var(--danger)}
-.footer{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-button{cursor:pointer;border:1px solid #1b2636;background:#0f1724;color:#dbe6f7;border-radius:12px;padding:10px 14px;font-weight:600;letter-spacing:.2px}
-button:hover{border-color:#2c74ff;box-shadow:0 0 0 3px rgba(60,140,255,.12)}
-.muted{color:var(--muted)}.mono{font-family:ui-monospace,monospace}
+:root{
+  --bg1:#05010a;--bg2:#0d0220;--accent:#00ffff;--accent2:#a020f0;--text:#e0e0e0;
+}
+html,body{
+  margin:0;padding:0;height:100%;
+  font-family:'Orbitron',sans-serif;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2));
+  color:var(--text);
+}
+h1,h2{text-align:center;text-shadow:0 0 10px var(--accent);margin:10px 0;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{color:#fff;}
+/* NAVBAR */
+nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 30px;background:rgba(10,5,25,0.9);
+  box-shadow:0 0 20px rgba(0,255,255,0.2);position:sticky;top:0;z-index:999;
+}
+nav img{height:50px;filter:drop-shadow(0 0 10px var(--accent));}
+nav ul{list-style:none;display:flex;gap:25px;margin:0;padding:0;}
+nav li a{color:var(--text);font-weight:bold;letter-spacing:1px;transition:0.2s;}
+nav li a:hover,nav li a.active{color:var(--accent);text-shadow:0 0 10px var(--accent);}
+
+/* FORMULARIO */
+section{width:95%;max-width:900px;margin:20px auto;}
+.calc-box{
+  background:rgba(15,10,25,0.85);
+  box-shadow:0 0 15px rgba(0,255,255,0.15);
+  border:1px solid rgba(0,255,255,0.2);
+  border-radius:10px;
+  padding:20px;
+}
+label{display:block;margin-bottom:4px;font-size:0.9em;}
+input,select,button{
+  width:100%;padding:10px;border-radius:5px;
+  background:#0a0a18;border:1px solid var(--accent2);
+  color:var(--text);font-family:'Orbitron';font-size:1em;
+  box-shadow:0 0 8px rgba(160,32,240,0.15);
+  transition:all .2s ease;box-sizing:border-box;
+}
+input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 10px var(--accent);}
+button{
+  margin-top:15px;background:linear-gradient(90deg,var(--accent2),var(--accent));
+  color:#000;font-weight:bold;border:none;text-transform:uppercase;letter-spacing:1px;
+}
+button:hover{background:var(--accent2);color:#fff;box-shadow:0 0 15px var(--accent2);}
+.result-box{
+  margin-top:20px;padding:15px;border-radius:8px;
+  background:rgba(10,5,25,0.7);border:1px solid rgba(0,255,255,0.2);
+  box-shadow:0 0 10px rgba(0,255,255,0.1);
+}
+footer{text-align:center;padding:15px 0;font-size:0.8em;opacity:0.6;}
 </style>
 </head>
-
 <body>
-<header>
-  <h1>Mew Trader_ESP</h1>
-  <img src="qr_telegram.png" alt="QR Telegram Mew Trader" width="200" height="200">
-  <p><a href="https://t.me/MewTraderESP" target="_blank">https://t.me/MewTraderESP</a></p>
-</header>
 
-<div class="app">
-  <h2 class="title">Calculadora de Precio Promedio & Stop Loss</h2>
-  <p class="subtitle">Entradas escalonadas <strong>15% / 30% / 55%</strong>. Calcula precio medio y SL para LONG/SHORT según capital, apalancamiento y riesgo máximo.</p>
+<!-- NAVBAR -->
+<nav>
+  <img src="../piensa.png" alt="Mew Trader ESP">
+  <ul>
+    <li><a href="../calc-protegida/index.html" class="active">Calculadora</a></li>
+    <li><a href="https://promote.mexc.com/b/REALTIMEMewTraderESP" target="_blank">Mis Operaciones</a></li>
+    <li><a href="../miau/diario.html">Diario de Trading</a></li>
+  </ul>
+</nav>
 
-  <div class="grid">
-    <section class="card half">
-      <h3 style="margin:0 0 12px">Parámetros</h3>
-      <div class="row" style="margin-bottom:10px">
-        <div class="field"><label>Capital total (USD)</label><input id="capital" class="input" type="number" value="100"></div>
-        <div class="field"><label>Apalancamiento (x)</label><input id="lev" class="input" type="number" value="10"></div>
-      </div>
-      <div class="row" style="margin-bottom:10px">
-        <div class="field"><label>Riesgo máximo (%)</label><input id="risk" class="input" type="number" value="30"></div>
-        <div class="field"><label>Pesos fijos</label><div class="weights"><span class="pill">15%</span><span class="pill">30%</span><span class="pill">55%</span></div></div>
-      </div>
-      <div class="row">
-        <div class="field"><label>Entrada 1 (15%)</label><input id="p1" class="input" type="number" value="100000"></div>
-        <div class="field"><label>Entrada 2 (30%)</label><input id="p2" class="input" type="number" value="98500"></div>
-      </div>
-      <div class="row" style="margin-top:10px">
-        <div class="field"><label>Entrada 3 (55%)</label><input id="p3" class="input" type="number" value="96800"></div>
-        <div class="field"><label>Riesgo en USD</label>
-          <div class="result"><span class="res-title">Riesgo</span><span id="riskUsd" class="res-value bad mono">$0.00</span></div>
-        </div>
-      </div>
-      <div class="footer">
-        <button id="reset">Restablecer</button>
-        <button id="copy">Copiar resultados</button>
-      </div>
-    </section>
+<section>
+  <h1>🧮 Calculadora — Mew Trader ESP</h1>
 
-    <section class="card half">
-      <h3 style="margin:0 0 12px">Resultados</h3>
+  <div class="calc-box">
+    <label for="entrada">Precio de entrada</label>
+    <input type="number" id="entrada" placeholder="Ej: 52000" step="0.0001">
 
-      <div class="field" style="margin-bottom:12px">
-        <label>Precio promedio</label>
-        <div class="result"><span class="res-title">USD por unidad</span><span id="avg" class="res-value accent mono">—</span></div>
-      </div>
+    <label for="capital">Capital total</label>
+    <input type="number" id="capital" placeholder="Ej: 1000" step="0.01">
 
-      <div id="detalleEntradas" style="margin-top:10px;color:#cbd6e8;font-size:13px;line-height:1.6"></div>
+    <label for="porcentaje">Porcentaje de inversión (%)</label>
+    <input type="number" id="porcentaje" placeholder="Ej: 15" step="0.1">
 
-      <div class="row" style="margin-top:14px">
-        <div class="field"><label>Stop Loss (LONG)</label>
-          <div class="result"><span class="res-title">Promedio − pérdida</span><span id="slLong" class="res-value bad mono">—</span></div>
-        </div>
-        <div class="field"><label>Stop Loss (SHORT)</label>
-          <div class="result"><span class="res-title">Promedio + pérdida</span><span id="slShort" class="res-value bad mono">—</span></div>
-        </div>
-      </div>
-    </section>
+    <label for="apalancamiento">Apalancamiento (X)</label>
+    <input type="number" id="apalancamiento" placeholder="Ej: 10" step="1">
+
+    <button id="calcular">Calcular</button>
+
+    <div class="result-box" id="resultado" style="display:none;">
+      <h2>📊 Resultado</h2>
+      <p id="detalle"></p>
+    </div>
   </div>
-</div>
+</section>
+
+<footer>© 2025 Mew Trader ESP — Special Forces</footer>
 
 <script>
-(function(){
-const $=id=>document.getElementById(id);
-const fmtUSD=v=>isFinite(v)?new Intl.NumberFormat('es-ES',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(v):'—';
-const fmtBTC=v=>isFinite(v)?new Intl.NumberFormat('es-ES',{minimumFractionDigits:6,maximumFractionDigits:8}).format(v):'—';
-const out={avg:$('avg'),slLong:$('slLong'),slShort:$('slShort'),riskUsd:$('riskUsd')};
-
-function calc(){
-  const capital=+$('capital').value||0,lev=Math.max(1,+$('lev').value||0),riskPct=Math.max(0,+$('risk').value||0);
-  const p1=+$('p1').value||0,p2=+$('p2').value||0,p3=+$('p3').value||0;
-  if(!(p1>0&&p2>0&&p3>0&&capital>0&&lev>=1)){
-    Object.values(out).forEach(e=>e.textContent='—');
-    $('detalleEntradas').innerHTML='';
-    return;
+document.getElementById("calcular").addEventListener("click",()=>{
+  const entrada=parseFloat(document.getElementById("entrada").value);
+  const capital=parseFloat(document.getElementById("capital").value);
+  const porcentaje=parseFloat(document.getElementById("porcentaje").value);
+  const apalancamiento=parseFloat(document.getElementById("apalancamiento").value);
+  if(isNaN(entrada)||isNaN(capital)||isNaN(porcentaje)||isNaN(apalancamiento)){
+    alert("Por favor completa todos los campos correctamente.");return;
   }
-
-  const pesos=[0.15,0.30,0.55];
-  const precios=[p1,p2,p3];
-  const montos=pesos.map(p=>capital*p);
-  const qtys=montos.map((m,i)=>m/precios[i]);
-  const totalQty=qtys.reduce((a,b)=>a+b,0);
-  const avg=capital/totalQty;
-  const riskUsd=capital*(riskPct/100);
-  const nominal=capital*lev;
-  const qtyNom=nominal/avg;
-  const lossPerBTC=riskUsd/qtyNom;
-  const slLong=avg-lossPerBTC;
-  const slShort=avg+lossPerBTC;
-
-  out.avg.textContent=fmtUSD(avg);
-  out.slLong.textContent=fmtUSD(slLong);
-  out.slShort.textContent=fmtUSD(slShort);
-  out.riskUsd.textContent=fmtUSD(riskUsd);
-
-  // Bloque dentro del panel de resultados
-  let html="";
-  precios.forEach((precio,i)=>{
-    html+=`<p>Entrada ${i+1} a <strong>${fmtUSD(precio)}</strong> → inversión <strong>${fmtUSD(montos[i])}</strong> (${(pesos[i]*100).toFixed(0)}% del capital)</p>`;
-  });
-  $('detalleEntradas').innerHTML=html;
-}
-
-['capital','lev','risk','p1','p2','p3'].forEach(id=>$(id).addEventListener('input',calc));
-$('reset').addEventListener('click',()=>{$('capital').value=100;$('lev').value=10;$('risk').value=30;$('p1').value=100000;$('p2').value=98500;$('p3').value=96800;calc();});
-$('copy').addEventListener('click',async()=>{const txt=document.body.innerText;await navigator.clipboard.writeText(txt);alert('Resultados copiados.');});
-calc();
-})();
+  const inversion=(capital*(porcentaje/100)).toFixed(2);
+  const posicion=(inversion*apalancamiento).toFixed(2);
+  const detalle=`Inversión: $${inversion}<br>Posición apalancada: $${posicion}<br>Precio de entrada: $${entrada}`;
+  document.getElementById("detalle").innerHTML=detalle;
+  document.getElementById("resultado").style.display="block";
+});
 </script>
+
 </body>
 </html>
-
