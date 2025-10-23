@@ -27,21 +27,6 @@ body{
   text-shadow:0 0 5px rgba(255,255,255,0.1);
 }
 
-/* HEADER */
-header{text-align:center;margin:30px 0;}
-header h1{
-  font-size:2.4rem;font-weight:700;letter-spacing:1px;margin:0;
-  color:var(--accent);text-shadow:0 0 10px var(--accent2);
-}
-header img{
-  display:block;margin:20px auto;border-radius:20px;max-width:200px;
-  box-shadow:0 0 15px rgba(0,255,255,0.3);
-}
-header a{
-  color:var(--accent2);text-decoration:none;font-weight:600;transition:.3s;
-}
-header a:hover{color:var(--accent);text-shadow:0 0 10px var(--accent);}
-
 /* APP */
 .app{width:100%;max-width:980px;}
 .title{
@@ -139,6 +124,35 @@ button:hover{
 }
 .muted{color:var(--muted);}
 .mono{font-family:ui-monospace,monospace;}
+
+/* BLOQUE PRINCIPAL */
+.main-header{
+  text-align:center;
+  margin:30px 0 40px;
+}
+.main-header h1{
+  font-size:2.4rem;
+  font-weight:700;
+  color:var(--accent);
+  text-shadow:0 0 15px var(--accent2);
+}
+.main-header img{
+  display:block;
+  margin:20px auto;
+  border-radius:20px;
+  max-width:200px;
+  box-shadow:0 0 15px rgba(0,255,255,0.3);
+}
+.main-header a{
+  color:var(--accent2);
+  text-decoration:none;
+  font-weight:600;
+  transition:.3s;
+}
+.main-header a:hover{
+  color:var(--accent);
+  text-shadow:0 0 10px var(--accent);
+}
 </style>
 </head>
 
@@ -153,19 +167,22 @@ button:hover{
       });
   </script>
 
-  <!-- 🔹 Espaciador para que el menú fijo no tape el contenido -->
+  <!-- 🔹 Espaciador para el menú fijo -->
   <div style="height:90px"></div>
 
-  <!-- 🔹 Contenido principal -->
-  <header>
+  <!-- 🔹 Bloque QR + título -->
+  <div class="main-header">
     <h1>Mew Trader_ESP</h1>
     <img src="qr_telegram.png" alt="QR Telegram Mew Trader" width="200" height="200">
     <p><a href="https://t.me/MewTraderESP" target="_blank">https://t.me/MewTraderESP</a></p>
-  </header>
+  </div>
 
+  <!-- 🔹 Aplicación -->
   <div class="app">
     <h2 class="title">Calculadora de Precio Promedio & Stop Loss</h2>
-    <p class="subtitle">Entradas escalonadas <strong>15% / 30% / 55%</strong>. Calcula precio medio y SL para LONG/SHORT según capital, apalancamiento y riesgo máximo.</p>
+    <p class="subtitle">
+      Entradas escalonadas <strong>15% / 30% / 55%</strong>. Calcula precio medio y SL para LONG/SHORT según capital, apalancamiento y riesgo máximo.
+    </p>
 
     <div class="grid">
       <section class="card half">
@@ -176,7 +193,9 @@ button:hover{
         </div>
         <div class="row" style="margin-bottom:10px">
           <div class="field"><label>Riesgo máximo (%)</label><input id="risk" class="input" type="number" value="30"></div>
-          <div class="field"><label>Pesos fijos</label><div class="weights"><span class="pill">15%</span><span class="pill">30%</span><span class="pill">55%</span></div></div>
+          <div class="field"><label>Pesos fijos</label>
+            <div class="weights"><span class="pill">15%</span><span class="pill">30%</span><span class="pill">55%</span></div>
+          </div>
         </div>
         <div class="row">
           <div class="field"><label>Entrada 1 (15%)</label><input id="p1" class="input" type="number" value="100000"></div>
@@ -261,6 +280,3 @@ button:hover{
   </script>
 </body>
 </html>
-
-
-
