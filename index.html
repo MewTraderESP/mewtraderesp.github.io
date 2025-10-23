@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mew Trader_ESP · Centro de Herramientas</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+:root{
+  --bg1:#05080f;
+  --bg2:#0b0f1a;
+  --accent:#00e0ff;
+  --accent-glow:rgba(0,224,255,0.45);
+  --text:#eaf7ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Orbitron',sans-serif;
+  background:radial-gradient(circle at top,#0b0f1a 0%,#05080f 100%);
+  color:var(--text);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  overflow-x:hidden;
+}
+@keyframes glowPulse{
+  0%,100%{box-shadow:0 0 25px var(--accent-glow);}
+  50%{box-shadow:0 0 60px var(--accent);}
+}
+header{
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px 10%;
+  background:rgba(10,14,25,0.6);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(0,224,255,0.2);
+  position:fixed;
+  top:0;left:0;
+  z-index:10;
+}
+.logo{
+  font-size:1.8rem;
+  font-weight:900;
+  color:var(--accent);
+  text-shadow:0 0 15px var(--accent);
+}
+nav{display:flex;gap:22px;}
+nav a{
+  color:var(--text);
+  text-decoration:none;
+  font-weight:600;
+  transition:.25s;
+  padding:6px 12px;
+  border-radius:6px;
+}
+nav a:hover{
+  color:var(--accent);
+  text-shadow:0 0 10px var(--accent-glow);
+  background:rgba(0,224,255,0.08);
+}
+main{
+  margin-top:120px;
+  text-align:center;
+  max-width:900px;
+  padding:0 20px;
+}
+main img{
+  width:280px;
+  animation:glowPulse 3s infinite;
+  border-radius:20px;
+}
+h1{
+  font-size:2.2rem;
+  margin:28px 0 14px;
+  text-shadow:0 0 15px var(--accent);
+}
+p{
+  font-size:1rem;
+  color:#9eb7c8;
+  margin-bottom:30px;
+}
+.buttons{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:16px;
+}
+button{
+  cursor:pointer;
+  border:1px solid var(--accent);
+  background:rgba(0,224,255,0.08);
+  color:var(--text);
+  border-radius:12px;
+  padding:14px 24px;
+  font-weight:700;
+  letter-spacing:.5px;
+  transition:.25s;
+  font-family:'Orbitron',sans-serif;
+}
+button:hover{
+  background:var(--accent);
+  color:#000;
+  box-shadow:0 0 30px var(--accent);
+}
+footer{
+  margin-top:auto;
+  padding:20px 0 30px;
+  color:#6f88a0;
+  font-size:13px;
+  text-align:center;
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+<header>
+  <div class="logo">Mew Trader_ESP</div>
+  <nav>
+    <a href="index.html">Inicio</a>
+    <a href="calculadoraparatelegram.html">Calculadora</a>
+    <a href="https://promote.mexc.com/b/REALTIMEMewTraderESP" target="_blank">Operaciones Real Time</a>
+    <a href="https://t.me/MewTraderESP" target="_blank">Canal Telegram</a>
+  </nav>
+</header>
+
+<main>
+  <img src="mew_fuera_caja_transparent.jpg" alt="Mew Trader ESP Logo">
+  <h1>Centro de Herramientas</h1>
+  <p>Piensa fuera de la caja. Accede a las utilidades oficiales y al seguimiento de operaciones en tiempo real de <strong>Mew Trader_ESP</strong>.</p>
+
+  <div class="buttons">
+    <button onclick="window.location.href='calculadoraparatelegram.html'">🧮 Calculadora</button>
+    <button onclick="window.open('https://promote.mexc.com/b/REALTIMEMewTraderESP','_blank')">📊 Operaciones en tiempo real</button>
+    <button onclick="window.open('https://t.me/MewTraderESP','_blank')">📢 Canal de Telegram</button>
+  </div>
+</main>
+
+<footer>© 2025 Mew Trader_ESP · Todos los derechos reservados</footer>
+</body>
+</html>
