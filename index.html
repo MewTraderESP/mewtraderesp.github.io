@@ -5,13 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Mew Trader_ESP · Centro de Herramientas</title>
 <meta name="robots" content="noindex,nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg1:#05080f;
-  --bg2:#0b0f1a;
+  --bg1:#05010a;
+  --bg2:#0d0220;
   --accent:#00e0ff;
   --accent-glow:rgba(0,224,255,0.45);
   --text:#eaf7ff;
+  --muted:#8aa3b8;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
@@ -29,26 +31,33 @@ body{
   0%,100%{box-shadow:0 0 25px var(--accent-glow);}
   50%{box-shadow:0 0 60px var(--accent);}
 }
+
+/* HEADER NAV */
 header{
   width:100%;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:16px 10%;
+  padding:16px 8%;
   background:rgba(10,14,25,0.6);
   backdrop-filter:blur(10px);
   border-bottom:1px solid rgba(0,224,255,0.2);
   position:fixed;
   top:0;left:0;
-  z-index:10;
+  z-index:1000;
 }
 .logo{
-  font-size:1.8rem;
+  font-size:1.6rem;
   font-weight:900;
   color:var(--accent);
   text-shadow:0 0 15px var(--accent);
 }
-nav{display:flex;gap:22px;}
+nav{
+  display:flex;
+  align-items:center;
+  gap:20px;
+  transition:all .3s ease;
+}
 nav a{
   color:var(--text);
   text-decoration:none;
@@ -62,6 +71,41 @@ nav a:hover{
   text-shadow:0 0 10px var(--accent-glow);
   background:rgba(0,224,255,0.08);
 }
+
+/* MOBILE MENU */
+.menu-toggle{
+  display:none;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+  width:32px;height:26px;
+  gap:5px;
+}
+.menu-toggle span{
+  width:100%;height:3px;
+  background:var(--accent);
+  border-radius:3px;
+  box-shadow:0 0 10px var(--accent-glow);
+  transition:.3s;
+}
+@media(max-width:850px){
+  nav{
+    position:absolute;
+    top:70px;left:0;
+    width:100%;
+    flex-direction:column;
+    background:rgba(5,8,20,0.98);
+    border-top:1px solid rgba(0,224,255,0.2);
+    padding:20px 0;
+    gap:18px;
+    transform:translateY(-200%);
+  }
+  nav.open{transform:translateY(0);}
+  .menu-toggle{display:flex;}
+}
+
+/* MAIN */
 main{
   margin-top:120px;
   text-align:center;
@@ -74,13 +118,13 @@ main img{
   border-radius:20px;
 }
 h1{
-  font-size:2.2rem;
+  font-size:2.3rem;
   margin:28px 0 14px;
   text-shadow:0 0 15px var(--accent);
 }
 p{
   font-size:1rem;
-  color:#9eb7c8;
+  color:var(--muted);
   margin-bottom:30px;
 }
 .buttons{
@@ -100,27 +144,34 @@ button{
   letter-spacing:.5px;
   transition:.25s;
   font-family:'Orbitron',sans-serif;
+  text-transform:uppercase;
+  box-shadow:0 0 15px rgba(0,224,255,0.15);
 }
 button:hover{
   background:var(--accent);
   color:#000;
   box-shadow:0 0 30px var(--accent);
 }
+
+/* FOOTER */
 footer{
   margin-top:auto;
   padding:20px 0 30px;
   color:#6f88a0;
   font-size:13px;
   text-align:center;
+  text-shadow:0 0 10px rgba(0,224,255,0.1);
 }
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
 </head>
 
 <body>
 <header>
   <div class="logo">Mew Trader_ESP</div>
-  <nav>
+  <div class="menu-toggle" id="menuToggle">
+    <span></span><span></span><span></span>
+  </div>
+  <nav id="mainNav">
     <a href="index.html">Inicio</a>
     <a href="calculadoraparatelegram.html">Calculadora</a>
     <a href="diario.html">Diario</a>
@@ -136,12 +187,21 @@ footer{
 
   <div class="buttons">
     <button onclick="window.location.href='calculadoraparatelegram.html'">🧮 Calculadora de Riesgo</button>
-    <button onclick="window.location.href='diario.html'">🧮 Diario de Trading</button>
-    <button onclick="window.open('https://promote.mexc.com/b/REALTIMEMewTraderESP','_blank')">📊 Mis Operaciones en tiempo real</button>
+    <button onclick="window.location.href='diario.html'">📘 Diario de Trading</button>
+    <button onclick="window.open('https://promote.mexc.com/b/REALTIMEMewTraderESP','_blank')">📊 Operaciones en Tiempo Real</button>
     <button onclick="window.open('https://t.me/MewTraderESP','_blank')">📢 Canal de Telegram</button>
   </div>
 </main>
 
 <footer>© 2025 MewTrader_ESP · Todos los derechos reservados - Un Miua para todos</footer>
+
+<script>
+const menuToggle=document.getElementById("menuToggle");
+const mainNav=document.getElementById("mainNav");
+menuToggle.addEventListener("click",()=>{
+  mainNav.classList.toggle("open");
+  menuToggle.classList.toggle("active");
+});
+</script>
 </body>
 </html>
