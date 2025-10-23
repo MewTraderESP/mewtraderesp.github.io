@@ -21,15 +21,7 @@ h1,h2{text-align:center;text-shadow:0 0 10px var(--accent);margin:10px 0;}
 a{color:var(--accent);text-decoration:none;}
 a:hover{color:#fff;}
 /* NAVBAR */
-nav {
-  display:flex;align-items:center;justify-content:space-between;
-  padding:10px 30px;background:rgba(10,5,25,0.9);
-  box-shadow:0 0 20px rgba(0,255,255,0.2);position:sticky;top:0;z-index:999;
-}
-nav img{height:50px;filter:drop-shadow(0 0 10px var(--accent));}
-nav ul{list-style:none;display:flex;gap:25px;margin:0;padding:0;}
-nav li a{color:var(--text);font-weight:bold;letter-spacing:1px;transition:0.2s;}
-nav li a:hover,nav li a.active{color:var(--accent);text-shadow:0 0 10px var(--accent);}
+
 
 /* CONTENEDORES */
 section{width:95%;max-width:1400px;margin:0 auto;}
@@ -124,16 +116,13 @@ footer {
 </style>
 </head>
 <body>
-
-<!-- NAVBAR -->
-<nav>
-  <img src="piensa.png" alt="Mew Trader ESP">
-  <ul>
-    <li><a href="calculadoraparatelegram.html">Calculadora</a></li>
-    <li><a href="https://promote.mexc.com/b/REALTIMEMewTraderESP" target="_blank">Mis Operaciones</a></li>
-    <li><a href="diario.html" class="active">Diario de Trading</a></li>
-  </ul>
-</nav>
+  
+<div id="menu-container"></div>
+<script>
+fetch("menu.html")
+  .then(r=>r.text())
+  .then(h=>document.getElementById("menu-container").innerHTML=h);
+</script>
 
 <section>
   <h1>🧠 Diario de Trading — Mew Trader ESP</h1>
@@ -842,5 +831,6 @@ footer {
 
 </body>
 </html>
+
 
 
