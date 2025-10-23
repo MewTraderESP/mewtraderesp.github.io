@@ -1,58 +1,63 @@
-<header>
-  <div class="logo">Mew Trader_ESP</div>
-  <div class="menu-toggle" onclick="this.classList.toggle('open');document.querySelector('nav').classList.toggle('open');">
-    <span></span><span></span><span></span>
-  </div>
-  <nav>
-    <a href="index.html">Inicio</a>
-    <a href="calculadoraparatelegram.html">Calculadora</a>
-    <a href="diario.html">Diario</a>
-    <a href="https://promote.mexc.com/b/REALTIMEMewTraderESP" target="_blank">Operaciones Real Time</a>
-    <a href="https://t.me/MewTraderESP" target="_blank">Canal Telegram</a>
-  </nav>
-</header>
-
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
+:root{
+  --bg1:#05010a;
+  --bg2:#0d0220;
+  --accent:#00e0ff;
+  --accent-glow:rgba(0,224,255,0.45);
+  --text:#eaf7ff;
+  --muted:#8aa3b8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{margin:0;font-family:'Orbitron',sans-serif;color:var(--text);}
+
+/* HEADER NAV */
 header{
   width:100%;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:14px 8%;
-  background:rgba(5,8,15,0.95);
-  backdrop-filter:blur(8px);
+  padding:16px 8%;
+  background:rgba(10,14,25,0.8);
+  backdrop-filter:blur(10px);
   border-bottom:1px solid rgba(0,224,255,0.25);
   position:fixed;
   top:0;left:0;
   z-index:1000;
-  box-shadow:0 0 20px rgba(0,224,255,0.1);
+  box-shadow:0 0 20px rgba(0,224,255,0.15);
 }
 .logo{
   font-size:1.6rem;
   font-weight:900;
-  color:#00e0ff;
-  text-shadow:0 0 12px #00e0ff;
+  color:var(--accent);
+  text-shadow:0 0 15px var(--accent);
 }
 nav{
   display:flex;
   align-items:center;
-  gap:24px;
+  gap:22px;
   transition:all .3s ease;
 }
 nav a{
-  color:#d6eaff;
+  color:var(--text);
   text-decoration:none;
   font-weight:600;
   transition:.25s;
   padding:6px 12px;
   border-radius:6px;
-  letter-spacing:.5px;
 }
 nav a:hover,nav a.active{
-  color:#00e0ff;
-  text-shadow:0 0 12px rgba(0,224,255,0.6);
+  color:var(--accent);
+  text-shadow:0 0 10px var(--accent-glow);
   background:rgba(0,224,255,0.08);
 }
+
+/* MOBILE MENU */
 .menu-toggle{
   display:none;
   flex-direction:column;
@@ -61,20 +66,19 @@ nav a:hover,nav a.active{
   cursor:pointer;
   width:34px;height:26px;
   gap:5px;
-  z-index:1100;
 }
 .menu-toggle span{
   width:100%;height:3px;
-  background:#00e0ff;
+  background:var(--accent);
   border-radius:3px;
-  box-shadow:0 0 8px rgba(0,224,255,0.45);
+  box-shadow:0 0 10px var(--accent-glow);
   transition:.3s;
 }
-.menu-toggle.open span:nth-child(1){transform:translateY(8px) rotate(45deg);}
-.menu-toggle.open span:nth-child(2){opacity:0;}
-.menu-toggle.open span:nth-child(3){transform:translateY(-8px) rotate(-45deg);}
+.menu-toggle.active span:nth-child(1){transform:translateY(8px) rotate(45deg);}
+.menu-toggle.active span:nth-child(2){opacity:0;}
+.menu-toggle.active span:nth-child(3){transform:translateY(-8px) rotate(-45deg);}
 
-@media(max-width:950px){
+@media(max-width:850px){
   nav{
     position:fixed;
     top:70px;left:0;
@@ -82,10 +86,11 @@ nav a:hover,nav a.active{
     flex-direction:column;
     align-items:center;
     background:rgba(5,8,20,0.97);
-    border-top:1px solid rgba(0,224,255,0.25);
+    border-top:1px solid rgba(0,224,255,0.2);
     padding:20px 0;
     gap:18px;
-    transform:translateY(-120%);
+    transform:translateY(-150%);
+    transition:transform .35s ease;
     overflow-y:auto;
     max-height:calc(100vh - 70px);
   }
@@ -93,10 +98,37 @@ nav a:hover,nav a.active{
   .menu-toggle{display:flex;}
 }
 </style>
+</head>
+
+<body>
+<header>
+  <div class="logo">Mew Trader_ESP</div>
+  <div class="menu-toggle" id="menuToggle">
+    <span></span><span></span><span></span>
+  </div>
+  <nav id="mainNav">
+    <a href="index.html">Inicio</a>
+    <a href="calculadoraparatelegram.html">Calculadora</a>
+    <a href="diario.html">Diario</a>
+    <a href="https://promote.mexc.com/b/REALTIMEMewTraderESP" target="_blank">Operaciones Real Time</a>
+    <a href="https://t.me/MewTraderESP" target="_blank">Canal Telegram</a>
+  </nav>
+</header>
 
 <script>
+// Control del menú responsive
+const menuToggle=document.getElementById("menuToggle");
+const mainNav=document.getElementById("mainNav");
+menuToggle.addEventListener("click",()=>{
+  mainNav.classList.toggle("open");
+  menuToggle.classList.toggle("active");
+});
+
 // Marca automáticamente el enlace activo
 document.querySelectorAll("nav a").forEach(a=>{
   if(a.href===location.href){a.classList.add("active");}
 });
 </script>
+</body>
+</html>
+
