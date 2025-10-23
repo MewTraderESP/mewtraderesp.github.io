@@ -6,6 +6,14 @@
 <meta name="robots" content="noindex,nofollow">
 <title>Mew Trader_ESP · Calculadora de Precio Promedio & Stop Loss</title>
 
+<script>
+/* 🔐 Protección por contraseña simple */
+const acceso = prompt("Introduce la clave de acceso:");
+if (acceso !== "MewTrader2025") {
+  document.write("<body style='background:#0b0f13;color:#ff6a6a;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;'><h2>⛔ Acceso denegado</h2></body>");
+  throw new Error("Acceso no autorizado");
+}
+</script>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
@@ -27,20 +35,58 @@ body {
   background: radial-gradient(circle at top left, var(--bg1), var(--bg2));
   color: var(--fg);
   display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-  padding: 24px;
+  padding: 0 24px 24px 24px;
   text-shadow: 0 0 5px rgba(255,255,255,0.1);
 }
 
+/* NAVBAR */
+nav {
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 30px;
+  background:rgba(10,5,25,0.9);
+  box-shadow:0 0 20px rgba(0,255,255,0.2);
+  position:sticky;
+  top:0;
+  z-index:999;
+}
+nav img {
+  height:50px;
+  filter:drop-shadow(0 0 10px var(--accent));
+}
+nav ul {
+  list-style:none;
+  display:flex;
+  gap:25px;
+  margin:0;
+  padding:0;
+}
+nav li a {
+  color:var(--fg);
+  font-weight:bold;
+  letter-spacing:1px;
+  text-decoration:none;
+  transition:0.2s;
+}
+nav li a:hover,nav li a.active {
+  color:var(--accent);
+  text-shadow:0 0 10px var(--accent);
+}
+
 /* HEADER */
-header { text-align: center; margin-bottom: 30px; }
+header { text-align: center; margin: 30px 0; }
 header h1 {
   font-size: 2.4rem; font-weight: 700; letter-spacing: 1px; margin: 0;
   color: var(--accent); text-shadow: 0 0 10px var(--accent2);
 }
-header img { display: block; margin: 20px auto; border-radius: 20px; max-width: 200px; box-shadow: 0 0 15px rgba(0,255,255,0.3); }
+header img {
+  display: block; margin: 20px auto; border-radius: 20px; max-width: 200px;
+  box-shadow: 0 0 15px rgba(0,255,255,0.3);
+}
 header a {
-  color: var(--accent2); text-decoration: none; font-weight: 600;
-  transition: 0.3s;
+  color: var(--accent2); text-decoration: none; font-weight: 600; transition: 0.3s;
 }
 header a:hover { color: var(--accent); text-shadow: 0 0 10px var(--accent); }
 
@@ -153,6 +199,17 @@ button:hover {
 </head>
 
 <body>
+
+<!-- 🔹 NAVBAR -->
+<nav>
+  <img src="mew_fuera_caja_transparent.png" alt="Mew Trader ESP">
+  <ul>
+    <li><a href="calculadoraparatelegram.html" class="active">Calculadora</a></li>
+    <li><a href="https://promote.mexc.com/b/REALTIMEMewTraderESP" target="_blank">Mis Operaciones</a></li>
+    <li><a href="diario.html">Diario de Trading</a></li>
+  </ul>
+</nav>
+
 <header>
   <h1>Mew Trader_ESP</h1>
   <img src="qr_telegram.png" alt="QR Telegram Mew Trader" width="200" height="200">
@@ -258,4 +315,6 @@ calc();
 </script>
 </body>
 </html>
+
+
 
