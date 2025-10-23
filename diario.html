@@ -124,7 +124,7 @@ fetch("menu.html")
     const container = document.getElementById("menu-container");
     container.innerHTML = h;
 
-    // 🔹 Reejecutar el script del menú manualmente
+    // Reejecutar la lógica del menú hamburguesa
     const script = document.createElement("script");
     script.textContent = `
       const menuToggle = document.getElementById("menuToggle");
@@ -135,6 +135,13 @@ fetch("menu.html")
       });
     `;
     container.appendChild(script);
+
+    // 🔹 Ajustar margen superior dinámicamente una vez cargado el menú
+    const menu = container.querySelector("header");
+    if (menu) {
+      const height = menu.offsetHeight || 90;
+      document.body.style.marginTop = height + "px";
+    }
   });
 </script>
 
@@ -845,6 +852,7 @@ fetch("menu.html")
 
 </body>
 </html>
+
 
 
 
