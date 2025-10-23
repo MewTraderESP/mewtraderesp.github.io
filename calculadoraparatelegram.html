@@ -192,15 +192,18 @@ button:hover {
 
 <body>
 
-<!-- 🔹 NAVBAR -->
-<nav>
-  <img src="mew_fuera_caja_transparent.png" alt="Mew Trader ESP">
-  <ul>
-    <li><a href="calculadoraparatelegram.html" class="active">Calculadora</a></li>
-    <li><a href="https://promote.mexc.com/b/REALTIMEMewTraderESP" target="_blank">Mis Operaciones</a></li>
-    <li><a href="diario.html">Diario de Trading</a></li>
-  </ul>
-</nav>
+    <div id="menu-container"></div>
+
+  <script>
+  fetch("menu.html")
+    .then(r => r.text())
+    .then(h => {
+      document.getElementById("menu-container").innerHTML = h;
+    });
+  </script>
+
+  <!-- 🔹 Espaciador para que el menú fijo no tape el contenido -->
+  <div style="height:90px"></div>
 
 <header>
   <h1>Mew Trader_ESP</h1>
@@ -307,6 +310,7 @@ calc();
 </script>
 </body>
 </html>
+
 
 
 
