@@ -1,0 +1,96 @@
+<header>
+  <div class="logo">Mew Trader_ESP</div>
+  <div class="menu-toggle" id="menuToggle">
+    <span></span><span></span><span></span>
+  </div>
+  <nav id="mainNav">
+    <a href="index.html">Inicio</a>
+    <a href="calculadoraparatelegram.html">Calculadora</a>
+    <a href="diario.html">Diario</a>
+    <a href="https://promote.mexc.com/b/REALTIMEMewTraderESP" target="_blank">Operaciones Real Time</a>
+    <a href="https://t.me/MewTraderESP" target="_blank">Canal Telegram</a>
+  </nav>
+</header>
+
+<style>
+header{
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px 8%;
+  background:rgba(10,14,25,0.6);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(0,224,255,0.2);
+  position:fixed;
+  top:0;left:0;
+  z-index:1000;
+}
+.logo{
+  font-size:1.6rem;
+  font-weight:900;
+  color:#00e0ff;
+  text-shadow:0 0 15px #00e0ff;
+}
+nav{
+  display:flex;
+  align-items:center;
+  gap:20px;
+  transition:all .3s ease;
+}
+nav a{
+  color:#eaf7ff;
+  text-decoration:none;
+  font-weight:600;
+  transition:.25s;
+  padding:6px 12px;
+  border-radius:6px;
+}
+nav a:hover,nav a.active{
+  color:#00e0ff;
+  text-shadow:0 0 10px rgba(0,224,255,0.45);
+  background:rgba(0,224,255,0.08);
+}
+.menu-toggle{
+  display:none;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+  width:32px;height:26px;
+  gap:5px;
+}
+.menu-toggle span{
+  width:100%;height:3px;
+  background:#00e0ff;
+  border-radius:3px;
+  box-shadow:0 0 10px rgba(0,224,255,0.45);
+  transition:.3s;
+}
+@media(max-width:850px){
+  nav{
+    position:absolute;
+    top:70px;left:0;
+    width:100%;
+    flex-direction:column;
+    background:rgba(5,8,20,0.98);
+    border-top:1px solid rgba(0,224,255,0.2);
+    padding:20px 0;
+    gap:18px;
+    transform:translateY(-200%);
+  }
+  nav.open{transform:translateY(0);}
+  .menu-toggle{display:flex;}
+}
+</style>
+
+<script>
+const menuToggle=document.getElementById("menuToggle");
+const mainNav=document.getElementById("mainNav");
+if(menuToggle && mainNav){
+  menuToggle.addEventListener("click",()=>{
+    mainNav.classList.toggle("open");
+    menuToggle.classList.toggle("active");
+  });
+}
+</script>
