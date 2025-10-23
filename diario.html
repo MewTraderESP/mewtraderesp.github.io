@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Diario de Trading — Mew Trader ESP</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root {
+  --bg1:#05010a;--bg2:#0d0220;--accent:#00ffff;--accent2:#a020f0;--text:#e0e0e0;
+  --success:#00d084;--error:#ff4b4b;--be:#1e90ff;
+}
+html,body {
+  margin:0;padding:0;height:100%;
+  font-family:'Orbitron',sans-serif;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2));
+  color:var(--text);
+}
+h1,h2{text-align:center;text-shadow:0 0 10px var(--accent);margin:10px 0;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{color:#fff;}
+/* NAVBAR */
+nav {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 30px;background:rgba(10,5,25,0.9);
+  box-shadow:0 0 20px rgba(0,255,255,0.2);position:sticky;top:0;z-index:999;
+}
+nav img{height:50px;filter:drop-shadow(0 0 10px var(--accent));}
+nav ul{list-style:none;display:flex;gap:25px;margin:0;padding:0;}
+nav li a{color:var(--text);font-weight:bold;letter-spacing:1px;transition:0.2s;}
+nav li a:hover,nav li a.active{color:var(--accent);text-shadow:0 0 10px var(--accent);}
+
+/* CONTENEDORES */
+section{width:95%;max-width:1400px;margin:0 auto;}
+form,table,#backtesting,#chartsContainer {
+  background:rgba(15,10,25,0.85);
+  box-shadow:0 0 15px rgba(0,255,255,0.15);
+  border:1px solid rgba(0,255,255,0.2);
+  border-radius:10px;
+  padding:15px;
+  margin:15px 0;
+}
+
+/* FORMULARIO */
+.form-row {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;
+  margin-bottom:10px;
+}
+label{display:block;margin-bottom:4px;font-size:0.85em;}
+input,textarea,select,button {
+  background:#0a0a18;
+  border:1px solid var(--accent2);
+  color:var(--text);
+  padding:8px;
+  border-radius:5px;
+  font-family:'Orbitron';
+  font-size:0.85em;
+  transition:all .2s ease;
+  box-shadow:0 0 8px rgba(160,32,240,0.15);
+  width:100%;
+  box-sizing:border-box;
+}
+input:focus,textarea:focus,select:focus {
+  outline:none;border-color:var(--accent);
+  box-shadow:0 0 10px var(--accent);
+}
+button {
+  cursor:pointer;text-transform:uppercase;letter-spacing:1px;
+}
+button:hover {
+  background:var(--accent2);color:#fff;box-shadow:0 0 15px var(--accent2);
+}
+
+/* BOTONES */
+.form-buttons,.db-buttons,#controls {
+  display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:10px;
+}
+.db-buttons button,.form-buttons button,#controls button {
+  background:linear-gradient(90deg,var(--accent2),var(--accent));
+  color:#000;font-weight:bold;border:none;
+}
+#controls select {max-width:250px;}
+
+/* TABLA */
+table {
+  width:100%;border-collapse:collapse;font-size:0.8em;margin-top:10px;
+  text-align:center;
+}
+th,td {
+  border:1px solid rgba(255,255,255,0.1);
+  padding:6px 8px;
+}
+th {background:rgba(255,255,255,0.1);}
+tr:nth-child(even){background:rgba(255,255,255,0.05);}
+.action-btn {
+  background:var(--accent2);
+  border:none;color:#fff;padding:4px 8px;margin:2px;
+  border-radius:4px;cursor:pointer;font-size:0.75em;
+}
+.action-btn:hover {background:var(--accent);}
+
+/* BACKTESTING */
+#backtesting table{border:none;}
+canvas {
+  background:#090912;
+  border-radius:10px;
+  width:100%!important;
+  height:300px!important;
+}
+
+/* OTROS */
+#selectImageDirBtn,#selectImageBtn {
+  background:linear-gradient(90deg,var(--accent2),var(--accent));
+  color:#000;font-weight:bold;border:none;
+  padding:8px 12px;
+}
+footer {
+  text-align:center;padding:15px 0;font-size:0.8em;opacity:0.6;
+  width:100%;margin-top:10px;
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <img src="piensa.png" alt="Mew Trader ESP">
+  <ul>
+    <li><a href="calc-protegida/index.html">Calculadora</a></li>
+    <li><a href="https://promote.mexc.com/b/REALTIMEMewTraderESP" target="_blank">Mis Operaciones</a></li>
+    <li><a href="diario.html" class="active">Diario de Trading</a></li>
+  </ul>
+</nav>
+
+<section>
+  <h1>🧠 Diario de Trading — Mew Trader ESP</h1>
+
+  <!-- FORMULARIO -->
+  <form id="tradeForm">
+    <div class="form-row">
+      <div><label>Fecha</label><input type="date" id="date" required></div>
+      <div><label>Activo</label><input id="asset" placeholder="BTC, SOL..." required></div>
+      <div><label>Tipo</label><select id="positionType"><option>Long</option><option>Short</option></select></div>
+      <div><label>Estrategia</label><select id="estrategia"><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+      <div><label>Entrada</label><input type="number" id="entry" step="0.0001" required></div>
+      <div><label>Take Profit</label><input type="number" id="exit" step="0.0001"></div>
+      <div><label>Stop Loss</label><input type="number" id="stopLoss" step="0.0001" required></div>
+      <div><label>Capital Operación</label><input type="number" id="capitalOper" required></div>
+      <div><label>Leverage</label><input type="number" id="leverage" required></div>
+    </div>
+    <div class="form-row">
+      <div class="full-width">
+        <button type="button" id="selectImageBtn">Seleccionar Imagen Inicio</button>
+        <span id="selectedImageName" style="margin-left:10px;font-style:italic;"></span>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="full-width">
+        <label>Notas</label><textarea id="notes" placeholder="Comentarios sobre la operación"></textarea>
+      </div>
+    </div>
+    <div class="form-buttons"><button type="submit">Agregar Operación</button></div>
+  </form>
+
+  <!-- BOTONES DB -->
+  <div class="db-buttons">
+    <button id="downloadBtn">⬇ Descargar BD</button>
+    <button id="uploadBtn">⬆ Cargar BD</button>
+  </div>
+  <input type="file" id="uploadInput" accept=".sqlite" style="display:none;">
+
+  <!-- CONTROLES -->
+  <div id="controls">
+    <button onclick="setSort('id')">Orden ID</button>
+    <button onclick="setSort('date')">Orden Fecha</button>
+    <button onclick="setSort('estrategia')">Orden Estrategia</button>
+    <select id="strategyFilter" onchange="setFilterStrategy(this.value)">
+      <option value="Todas">Todas Estrategias</option>
+      <option value="1">Doble Supertrend</option>
+      <option value="2">Minisupertrend</option>
+      <option value="3">Estrategia 3</option>
+      <option value="4">Estrategia 4</option>
+    </select>
+  </div>
+
+  <h2>📜 Operaciones Registradas</h2>
+  <table id="tradesTable">
+    <thead><tr><th>ID</th><th>Fecha</th><th>Tipo</th><th>Activo</th><th>Estrategia</th><th>Entrada</th><th>TP</th><th>SL</th><th>Capital</th><th>Lev</th><th>TP %</th><th>TP $</th><th>SL %</th><th>SL $</th><th>Ratio</th><th>Resultado</th><th>BE</th><th>Notas</th><th>Imágenes</th><th>Acciones</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>📊 Backtesting Global</h2>
+  <div id="backtesting"></div>
+  <div id="chartsContainer" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:space-around;">
+    <div style="flex:1;min-width:400px;"><canvas id="equityChart"></canvas></div>
+    <div style="flex:1;min-width:400px;"><canvas id="netWinChart"></canvas></div>
+  </div>
+
+  <br><button id="selectImageDirBtn">📁 Seleccionar Carpeta de Imágenes</button><br><br>
+</section>
+
+<footer>© 2025 Mew Trader ESP — Special Forces</footer>
+
+<!-- SCRIPT ORIGINAL -->
+<script>
+    let db;
+    let equityChart; // Gráfica de capital
+    let netWinChart; // Gráfica de operaciones netas
+
+    // Variables para ordenar y filtrar
+    let currentSortField = "id";
+    let currentSortOrder = "DESC";
+    let currentFilterStrategy = "Todas";
+
+    // Variables para manejo de imágenes
+    let imageDirHandle = null; // Carpeta seleccionada
+    let selectedImageName = "";  // Nombre de la imagen de inicio
+
+    // Funciones para ordenar y filtrar registros
+    function setSort(field) {
+      if (currentSortField === field) {
+        currentSortOrder = (currentSortOrder === "ASC") ? "DESC" : "ASC";
+      } else {
+        currentSortField = field;
+        currentSortOrder = "ASC";
+      }
+      loadTrades();
+      updateBacktestingStats();
+    }
+    function setFilterStrategy(strategy) {
+      currentFilterStrategy = strategy;
+      loadTrades();
+      updateBacktestingStats();
+    }
+
+    // Seleccionar carpeta de imágenes
+    document.getElementById('selectImageDirBtn').addEventListener('click', async () => {
+      try {
+        imageDirHandle = await window.showDirectoryPicker();
+        alert("Carpeta de imágenes seleccionada correctamente.");
+      } catch (error) {
+        console.error("Error al seleccionar la carpeta:", error);
+      }
+    });
+
+    // Seleccionar imagen de inicio de la operación
+    document.getElementById('selectImageBtn').addEventListener('click', async () => {
+      if (!imageDirHandle) {
+        alert("Primero selecciona la Carpeta de Imágenes.");
+        return;
+      }
+      try {
+        const [fileHandle] = await window.showOpenFilePicker({
+          startIn: imageDirHandle,
+          types: [{
+            description: 'Imágenes',
+            accept: { 'image/*': ['.png', '.jpg', '.jpeg', '.gif'] }
+          }]
+        });
+        selectedImageName = fileHandle.name;
+        document.getElementById('selectedImageName').textContent = selectedImageName;
+      } catch (error) {
+        console.error("Error al seleccionar la imagen:", error);
+      }
+    });
+
+    // Función para adjuntar imagen de inicio si no existe
+    async function attachStartImage(tradeId) {
+      if (!imageDirHandle) {
+        alert("Primero selecciona la Carpeta de Imágenes.");
+        return;
+      }
+      try {
+        const [fileHandle] = await window.showOpenFilePicker({
+          startIn: imageDirHandle,
+          types: [{
+            description: 'Imágenes',
+            accept: { 'image/*': ['.png', '.jpg', '.jpeg', '.gif'] }
+          }]
+        });
+        const startImageName = fileHandle.name;
+        const stmt = db.prepare("UPDATE trades SET imagePath = ? WHERE id = ?");
+        stmt.bind([startImageName, tradeId]);
+        stmt.step();
+        stmt.free();
+        saveDatabase();
+        loadTrades();
+        updateBacktestingStats();
+        alert("Imagen de inicio adjuntada correctamente.");
+      } catch (error) {
+        console.error("Error al adjuntar la imagen de inicio:", error);
+      }
+    }
+
+    // Función para adjuntar BE price
+    async function attachBEPrice(tradeId) {
+      let bePrice = prompt("Ingresa el precio BE ($):");
+      if (bePrice === null || bePrice.trim() === "") {
+        alert("No se ingresó ningún precio.");
+        return;
+      }
+      bePrice = parseFloat(bePrice);
+      if (isNaN(bePrice)) {
+        alert("Por favor ingresa un valor numérico válido.");
+        return;
+      }
+      const stmt = db.prepare("UPDATE trades SET bePrice = ? WHERE id = ?");
+      stmt.bind([bePrice, tradeId]);
+      stmt.step();
+      stmt.free();
+      saveDatabase();
+      loadTrades();
+      updateBacktestingStats();
+      alert("Precio BE adjuntado correctamente.");
+    }
+
+    // Inicialización de SQL.js y la base de datos
+    initSqlJs({
+      locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+    }).then(function(SQL) {
+      window.SQL = SQL;
+      initDatabase(SQL);
+    });
+
+    // Guarda la base de datos en localStorage
+    function saveDatabase() {
+      const data = db.export();
+      const base64String = btoa(String.fromCharCode(...data));
+      localStorage.setItem("tradingDB", base64String);
+    }
+
+    // Inicializa la base de datos (incluye columna bePrice)
+    function initDatabase(SQL) {
+      const savedDB = localStorage.getItem("tradingDB");
+      if (savedDB) {
+        const uInt8Array = Uint8Array.from(atob(savedDB), c => c.charCodeAt(0));
+        db = new SQL.Database(uInt8Array);
+      } else {
+        db = new SQL.Database();
+        db.run(`CREATE TABLE trades (
+          id INTEGER PRIMARY KEY,
+          date TEXT,
+          positionType TEXT,
+          asset TEXT,
+          estrategia INTEGER,
+          entry REAL,
+          exit REAL,
+          stopLoss REAL,
+          capitalOper REAL,
+          leverage REAL,
+          resultado TEXT,
+          notes TEXT,
+          imagePath TEXT,
+          endImagePath TEXT,
+          bePrice REAL
+        )`);
+      }
+      loadTrades();
+      updateBacktestingStats();
+    }
+
+    // Función para calcular indicadores
+    function calcularIndicadores(entry, exit, stopLoss, capitalOper, leverage, positionType) {
+      const nominalPosition = capitalOper * leverage;
+      let tpCalculado, slCalculado, tpDolares, slDolares, ratioRB;
+      if (positionType === "Long") {
+        tpCalculado = exit !== null ? ((exit - entry) / entry) * 100 : null;
+        slCalculado = ((entry - stopLoss) / entry) * 100;
+        tpDolares = exit !== null ? nominalPosition * ((exit - entry) / entry) : "N/A";
+        slDolares = nominalPosition * ((entry - stopLoss) / entry);
+        ratioRB = (exit !== null && (entry - stopLoss) !== 0)
+          ? (tpDolares / slDolares).toFixed(2)
+          : "N/A";
+      } else {
+        tpCalculado = exit !== null ? ((entry - exit) / entry) * 100 : null;
+        slCalculado = ((stopLoss - entry) / entry) * 100;
+        tpDolares = exit !== null ? nominalPosition * ((entry - exit) / entry) : "N/A";
+        slDolares = nominalPosition * ((stopLoss - entry) / entry);
+        ratioRB = (exit !== null && (stopLoss - entry) !== 0)
+          ? (tpDolares / slDolares).toFixed(2)
+          : "N/A";
+      }
+      return {
+        tpCalculado: tpCalculado !== null ? tpCalculado.toFixed(2) : "N/A",
+        slCalculado: slCalculado.toFixed(2),
+        tpDolares: tpDolares !== "N/A" ? parseFloat(tpDolares).toFixed(2) : "N/A",
+        slDolares: parseFloat(slDolares).toFixed(2),
+        ratioRB: ratioRB
+      };
+    }
+
+    // Agregar operación
+    document.getElementById("tradeForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const date = document.getElementById("date").value;
+      const asset = document.getElementById("asset").value;
+      const positionType = document.getElementById("positionType").value;
+      const estrategia = parseInt(document.getElementById("estrategia").value);
+      const entry = parseFloat(document.getElementById("entry").value);
+      const exit = parseFloat(document.getElementById("exit").value) || null;
+      const stopLoss = parseFloat(document.getElementById("stopLoss").value);
+      const capitalOper = parseFloat(document.getElementById("capitalOper").value);
+      const leverage = parseFloat(document.getElementById("leverage").value);
+      const resultado = "Pendiente";
+      const notes = document.getElementById("notes").value;
+      const imagePath = selectedImageName || "";
+      const endImagePath = "";
+      const bePrice = null;
+
+      const stmt = db.prepare(`
+        INSERT INTO trades (
+          date, positionType, asset, estrategia, entry, exit, stopLoss, capitalOper, leverage,
+          resultado, notes, imagePath, endImagePath, bePrice
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      stmt.bind([date, positionType, asset, estrategia, entry, exit, stopLoss, capitalOper, leverage, resultado, notes, imagePath, endImagePath, bePrice]);
+      stmt.step();
+      stmt.free();
+
+      saveDatabase();
+      loadTrades();
+      updateBacktestingStats();
+      this.reset();
+      selectedImageName = "";
+      document.getElementById('selectedImageName').textContent = "";
+    });
+
+    // Cargar operaciones en la tabla
+    function loadTrades() {
+      const tbody = document.getElementById("tradesTable").querySelector("tbody");
+      tbody.innerHTML = "";
+      let query = "SELECT id, date, positionType, asset, estrategia, entry, exit, stopLoss, capitalOper, leverage, resultado, notes, imagePath, endImagePath, bePrice FROM trades";
+      if (currentFilterStrategy !== "Todas") {
+        query += " WHERE estrategia = " + currentFilterStrategy;
+      }
+      query += " ORDER BY " + currentSortField + " " + currentSortOrder;
+
+      const res = db.exec(query);
+      if (res[0]) {
+        res[0].values.forEach(row => {
+          const [id, date, posType, asset, estrategia, entry, exit, stopLoss, capitalOper, leverage, resultado, notes, imagePath, endImagePath, bePrice] = row;
+          const indicadores = calcularIndicadores(entry, exit, stopLoss, capitalOper, leverage, posType);
+
+          let imagenesCol = "";
+          if (imagePath) {
+            imagenesCol += `<button class="action-btn" onclick="viewImage('${imagePath}')">Ver Inicio</button><br/>`;
+          } else {
+            imagenesCol += `<button class="action-btn" onclick="attachStartImage(${id})">Adjuntar Inicio</button><br/>`;
+          }
+          if (endImagePath) {
+            imagenesCol += `<button class="action-btn" onclick="viewEndImage('${endImagePath}')">Ver Final</button>`;
+          } else {
+            imagenesCol += `<button class="action-btn" onclick="attachEndImage(${id})">Adjuntar Final</button>`;
+          }
+
+          // BE ($)
+          let beCol = "";
+          if (resultado === "BE") {
+            if (bePrice !== null) {
+              beCol = "$" + parseFloat(bePrice).toFixed(2);
+            } else {
+              beCol = `<button class="action-btn" onclick="attachBEPrice(${id})">Adjuntar BE</button>`;
+            }
+          }
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td style="${(resultado === 'Ganada') ? 'background-color:green; color:white;' : (resultado === 'Perdida') ? 'background-color:red; color:white;' : (resultado === 'BE') ? 'background-color:blue; color:white;' : ''}">${id}</td>
+            <td>${date}</td>
+            <td>${posType}</td>
+            <td>${asset}</td>
+            <td>${estrategia}</td>
+            <td>$${parseFloat(entry).toFixed(4)}</td>
+            <td>${exit !== null ? "$" + parseFloat(exit).toFixed(4) : ""}</td>
+            <td>$${parseFloat(stopLoss).toFixed(4)}</td>
+            <td>$${parseFloat(capitalOper).toFixed(4)}</td>
+            <td>${leverage}x</td>
+            <td>${indicadores.tpCalculado !== "N/A" ? indicadores.tpCalculado + "%" : "N/A"}</td>
+            <td>${indicadores.tpDolares !== "N/A" ? "$" + indicadores.tpDolares : "N/A"}</td>
+            <td>${indicadores.slCalculado}%</td>
+            <td>$${indicadores.slDolares}</td>
+            <td>${indicadores.ratioRB}</td>
+            <td>
+              <select data-id="${id}" onchange="updateResult(this)">
+                <option value="Pendiente" ${resultado === "Pendiente" ? "selected" : ""}>Pendiente</option>
+                <option value="Ganada" ${resultado === "Ganada" ? "selected" : ""}>Ganada</option>
+                <option value="Perdida" ${resultado === "Perdida" ? "selected" : ""}>Perdida</option>
+                <option value="BE" ${resultado === "BE" ? "selected" : ""}>BE</option>
+              </select>
+            </td>
+            <td>${beCol}</td>
+            <td>${notes}</td>
+            <td>${imagenesCol}</td>
+            <td>
+              <button class="action-btn" onclick="deleteTrade(${id})">Borrar</button>
+              <button class="action-btn" onclick="modifyTrade(${id})">Modificar</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    }
+
+    // Borrar operación
+    function deleteTrade(id) {
+      if (!confirm("¿Seguro que deseas borrar esta operación?")) return;
+      const stmt = db.prepare("DELETE FROM trades WHERE id = ?");
+      stmt.bind([id]);
+      stmt.step();
+      stmt.free();
+      saveDatabase();
+      loadTrades();
+      updateBacktestingStats();
+      alert("Operación borrada con éxito.");
+    }
+
+    // Modificar operación
+    function modifyTrade(id) {
+      const res = db.exec("SELECT * FROM trades WHERE id = " + id);
+      if (!res[0] || !res[0].values.length) {
+        alert("Operación no encontrada.");
+        return;
+      }
+      const [curId, curDate, curPosType, curAsset, curEstrategia, curEntry, curExit, curStopLoss, curCapitalOper, curLeverage, curResultado, curNotes, curImagePath, curEndImagePath, curBEPrice] = res[0].values[0];
+      const newDate = prompt("Fecha:", curDate) || curDate;
+      const newPosType = prompt("Tipo (Long/Short):", curPosType) || curPosType;
+      const newAsset = prompt("Activo:", curAsset) || curAsset;
+      const newEstrategia = prompt("Estrategia (1=Doble Supertrend, 2=Minisupertrend, 3,4):", curEstrategia) || curEstrategia;
+      const newEntry = parseFloat(prompt("Entrada:", curEntry) || curEntry);
+      const newExit = parseFloat(prompt("Take Profit:", curExit) || curExit);
+      const newStopLoss = parseFloat(prompt("Stop Loss:", curStopLoss) || curStopLoss);
+      const newCapitalOper = parseFloat(prompt("Capital Operación:", curCapitalOper) || curCapitalOper);
+      const newLeverage = parseFloat(prompt("Leverage:", curLeverage) || curLeverage);
+      const newNotes = prompt("Notas:", curNotes) || curNotes;
+      let newBEPrice = curBEPrice;
+      if (curResultado === "BE") {
+        newBEPrice = prompt("BE ($):", curBEPrice !== null ? curBEPrice : "");
+        if (newBEPrice !== null && newBEPrice.trim() !== "") {
+          newBEPrice = parseFloat(newBEPrice);
+        } else {
+          newBEPrice = null;
+        }
+      }
+      const stmt = db.prepare(`
+        UPDATE trades
+        SET date = ?,
+            positionType = ?,
+            asset = ?,
+            estrategia = ?,
+            entry = ?,
+            exit = ?,
+            stopLoss = ?,
+            capitalOper = ?,
+            leverage = ?,
+            notes = ?,
+            bePrice = ?
+        WHERE id = ?
+      `);
+      stmt.bind([newDate, newPosType, newAsset, newEstrategia, newEntry, newExit, newStopLoss, newCapitalOper, newLeverage, newNotes, newBEPrice, id]);
+      stmt.step();
+      stmt.free();
+      saveDatabase();
+      loadTrades();
+      updateBacktestingStats();
+      alert("Operación modificada con éxito.");
+    }
+
+    // Actualizar resultado
+    function updateResult(selectElem) {
+      const newResult = selectElem.value;
+      const tradeId = selectElem.getAttribute("data-id");
+      const stmt = db.prepare("UPDATE trades SET resultado = ? WHERE id = ?");
+      stmt.bind([newResult, tradeId]);
+      stmt.step();
+      stmt.free();
+      saveDatabase();
+      updateBacktestingStats();
+      const row = selectElem.parentElement.parentElement;
+      const idCell = row.querySelector("td:first-child");
+      if (newResult === "Ganada") {
+        idCell.style.backgroundColor = "green";
+        idCell.style.color = "white";
+      } else if (newResult === "Perdida") {
+        idCell.style.backgroundColor = "red";
+        idCell.style.color = "white";
+      } else if (newResult === "BE") {
+        idCell.style.backgroundColor = "blue";
+        idCell.style.color = "white";
+      } else {
+        idCell.style.backgroundColor = "";
+        idCell.style.color = "";
+      }
+    }
+
+    // Visualizar imagen
+    async function viewImage(imageName) {
+      if (!imageDirHandle) {
+        alert("Para ver la imagen, primero selecciona la Carpeta de Imágenes.");
+        return;
+      }
+      try {
+        const fileHandle = await imageDirHandle.getFileHandle(imageName);
+        const file = await fileHandle.getFile();
+        const url = URL.createObjectURL(file);
+        window.open(url, '_blank');
+      } catch (error) {
+        console.error("Error al abrir la imagen:", error);
+        alert("No se pudo abrir la imagen. Asegúrate de que el archivo exista en la carpeta seleccionada.");
+      }
+    }
+    async function viewEndImage(imageName) {
+      await viewImage(imageName);
+    }
+
+    // Adjuntar imagen final
+    async function attachEndImage(tradeId) {
+      if (!imageDirHandle) {
+        alert("Primero selecciona la Carpeta de Imágenes.");
+        return;
+      }
+      try {
+        const [fileHandle] = await window.showOpenFilePicker({
+          startIn: imageDirHandle,
+          types: [{
+            description: 'Imágenes',
+            accept: { 'image/*': ['.png', '.jpg', '.jpeg', '.gif'] }
+          }]
+        });
+        const endImageName = fileHandle.name;
+        const stmt = db.prepare("UPDATE trades SET endImagePath = ? WHERE id = ?");
+        stmt.bind([endImageName, tradeId]);
+        stmt.step();
+        stmt.free();
+        saveDatabase();
+        loadTrades();
+        updateBacktestingStats();
+        alert("Imagen final adjuntada correctamente.");
+      } catch (error) {
+        console.error("Error al adjuntar la imagen final:", error);
+      }
+    }
+
+    // Gráficas y Backtesting
+    function renderEquityChart(equityData) {
+      const ctx = document.getElementById('equityChart').getContext('2d');
+      if (equityChart) { equityChart.destroy(); }
+      equityChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: equityData.labels,
+          datasets: [{
+            label: 'Curva de Capital (Ganancia neta acumulada)',
+            data: equityData.values,
+            borderColor: 'rgba(75, 192, 192, 1)',
+            fill: false,
+            tension: 0.1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { title: { display: true, text: 'Evolución de la Equidad' } },
+          scales: { y: { beginAtZero: false } }
+        }
+      });
+    }
+
+    function renderNetWinChart(netWinData) {
+      const ctx = document.getElementById('netWinChart').getContext('2d');
+      if (netWinChart) { netWinChart.destroy(); }
+      netWinChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: netWinData.labels,
+          datasets: [{
+            label: 'Curva de Operaciones Netas (Ganadas - Perdidas)',
+            data: netWinData.values,
+            borderColor: 'rgba(153, 102, 255, 1)',
+            fill: false,
+            tension: 0.1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { title: { display: true, text: 'Evolución Neta de Operaciones' } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    function updateBacktestingStats() {
+      let query = "SELECT id, date, positionType, entry, exit, stopLoss, capitalOper, leverage, resultado, bePrice FROM trades";
+      if (currentFilterStrategy !== "Todas") {
+        query += " WHERE estrategia = " + currentFilterStrategy;
+      }
+      query += " ORDER BY id ASC";
+
+      const res = db.exec(query);
+      let totalClosed = 0, winTrades = 0, lossTrades = 0, beTrades = 0;
+      let totalGains = 0, totalLosses = 0, netProfit = 0, equity = 0;
+      const equityLabels = ["Inicio"], equityValues = [0];
+
+      // netWins para la gráfica "Curva de Operaciones Netas"
+      let netWins = 0;
+      const netWinLabels = ["Inicio"], netWinValues = [netWins];
+
+      // Solo se cuentan Ganadas y Perdidas en la estadística de winRate/profitFactor
+      let countForCalc = 0;
+
+      let maxEquitySoFar = 0;
+      let maxDrawdown = 0;
+
+      if (res[0]) {
+        res[0].values.forEach(row => {
+          totalClosed++;
+          const [id, date, posType, entry, exit, stopLoss, capitalOper, leverage, resultado, bePrice] = row;
+          const entryF = parseFloat(entry), exitF = parseFloat(exit);
+          const capOperF = parseFloat(capitalOper), levF = parseFloat(leverage);
+
+          // Determinamos la ganancia/pérdida en dólares
+          let tradePnL = 0;
+          if (resultado === "Ganada") {
+            // Ganada => +1 en netWins
+            const indicadores = calcularIndicadores(entryF, exitF, parseFloat(stopLoss), capOperF, levF, posType);
+            tradePnL = parseFloat(indicadores.tpDolares);
+            totalGains += tradePnL;
+            winTrades++;
+            countForCalc++;
+            netWins++; // Aumenta 1
+          } else if (resultado === "Perdida") {
+            // Perdida => -1 en netWins
+            const indicadores = calcularIndicadores(entryF, exitF, parseFloat(stopLoss), capOperF, levF, posType);
+            tradePnL = -parseFloat(indicadores.slDolares);
+            totalLosses += Math.abs(tradePnL);
+            lossTrades++;
+            countForCalc++;
+            netWins--; // Resta 1
+          } else if (resultado === "BE") {
+            // BE => 0 en netWins (no se modifica)
+            tradePnL = (bePrice !== null ? parseFloat(bePrice) : 0);
+            beTrades++;
+          } else {
+            // Pendiente => no cuenta en nada
+          }
+
+          // Actualizamos la equidad y la netProfit
+          netProfit += tradePnL;
+          equity += tradePnL;
+
+          // Llenamos las etiquetas y valores para las gráficas
+          equityLabels.push(`Op ${id}`);
+          equityValues.push(equity);
+
+          netWinLabels.push(`Op ${id}`);
+          netWinValues.push(netWins);
+
+          // Cálculo de drawdown
+          if (equity > maxEquitySoFar) {
+            maxEquitySoFar = equity;
+          } else {
+            const drawdownActual = equity - maxEquitySoFar;
+            if (drawdownActual < maxDrawdown) {
+              maxDrawdown = drawdownActual;
+            }
+          }
+        });
+      }
+
+      // Calculamos winRate y profitFactor
+      const winRate = countForCalc > 0 ? ((winTrades / countForCalc) * 100).toFixed(2) : 0;
+      const profitFactor = totalLosses > 0 ? (totalGains / totalLosses).toFixed(2) : "N/A";
+
+      // Drawdown
+      const maxDrawdownAbs = Math.abs(maxDrawdown).toFixed(2);
+      let maxDrawdownPct = "N/A";
+      if (maxEquitySoFar > 0) {
+        maxDrawdownPct = ((Math.abs(maxDrawdown) / maxEquitySoFar) * 100).toFixed(2);
+      }
+
+      // Renderizamos la tabla final de estadísticas
+      document.getElementById("backtesting").innerHTML = `
+        <table style="width:100%; border-collapse: collapse; border: none;">
+          <tr>
+            <td style="border:none;">Total: ${totalClosed}</td>
+            <td style="border:none;">Aciertos: ${winRate}%</td>
+            <td style="border:none;">Ganancia TP: $${totalGains.toFixed(2)}</td>
+            <td style="border:none;">Pérdida SL: $${totalLosses.toFixed(2)}</td>
+            <td style="border:none;">Neta: $${netProfit.toFixed(2)}</td>
+          </tr>
+          <tr>
+            <td style="border:none;">Profit Factor: ${profitFactor}</td>
+            <td style="border:none;">Ganados: ${winTrades}</td>
+            <td style="border:none;">Perdidos: ${lossTrades}</td>
+            <td style="border:none;">BE: ${beTrades}</td>
+            <td style="border:none;">Drawdown: $${maxDrawdownAbs} (${maxDrawdownPct}%)</td>
+          </tr>
+        </table>
+      `;
+
+      // Renderizamos las gráficas
+      renderEquityChart({ labels: equityLabels, values: equityValues });
+      renderNetWinChart({ labels: netWinLabels, values: netWinValues });
+    }
+
+    // Descargar base de datos
+    document.getElementById("downloadBtn").addEventListener("click", function() {
+      const data = db.export();
+      const blob = new Blob([data], { type: "application/octet-stream" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "tradingJournal.sqlite";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    // Cargar base de datos
+    document.getElementById("uploadBtn").addEventListener("click", function() {
+      document.getElementById("uploadInput").click();
+    });
+
+    document.getElementById("uploadInput").addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function() {
+        const arrayBuffer = reader.result;
+        const uInt8Array = new Uint8Array(arrayBuffer);
+        db = new window.SQL.Database(uInt8Array);
+        saveDatabase();
+        loadTrades();
+        updateBacktestingStats();
+        alert("Base de datos cargada correctamente.");
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  </script>
+
+</body>
+</html>
