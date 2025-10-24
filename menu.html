@@ -8,11 +8,13 @@
 :root{
   --bg1:#05010a;
   --bg2:#0d0220;
-  --accent:#00e0ff;
+  --accent:#00e0ff;                 /* Azul eléctrico */
   --accent-glow:rgba(0,224,255,0.45);
   --text:#eaf7ff;
   --muted:#8aa3b8;
 }
+
+/* RESETEO */
 *{box-sizing:border-box;margin:0;padding:0}
 body{margin:0;font-family:'Orbitron',sans-serif;color:var(--text);}
 
@@ -31,12 +33,21 @@ header{
   z-index:1000;
   box-shadow:0 0 20px rgba(0,224,255,0.15);
 }
+
+/* 🔹 Efecto flicker neón para el logo */
+@keyframes flickerLogo {
+  0%,18%,22%,25%,53%,57%,100% {opacity:1;text-shadow:0 0 15px var(--accent),0 0 30px rgba(0,224,255,0.5);}
+  20%,24%,55% {opacity:0.85;text-shadow:0 0 5px var(--accent);}
+}
 .logo{
   font-size:1.6rem;
   font-weight:900;
   color:var(--accent);
   text-shadow:0 0 15px var(--accent);
+  animation:flickerLogo 5s infinite; /* 💡 Efecto de neón azul parpadeante */
 }
+
+/* NAV LINKS */
 nav{
   display:flex;
   align-items:center;
@@ -57,7 +68,7 @@ nav a:hover,nav a.active{
   background:rgba(0,224,255,0.08);
 }
 
-/* MOBILE MENU */
+/* BOTÓN HAMBURGUESA */
 .menu-toggle{
   display:none;
   flex-direction:column;
@@ -78,6 +89,7 @@ nav a:hover,nav a.active{
 .menu-toggle.active span:nth-child(2){opacity:0;}
 .menu-toggle.active span:nth-child(3){transform:translateY(-8px) rotate(-45deg);}
 
+/* RESPONSIVE */
 @media(max-width:850px){
   nav {
     position: absolute;
@@ -85,30 +97,25 @@ nav a:hover,nav a.active{
     left: 0;
     width: 100%;
     flex-direction: column;
-    align-items: flex-start;   /* 👈 Alinea todo a la izquierda */
-    text-align: left;          /* 👈 Texto alineado a la izquierda */
+    align-items: flex-start;  /* 👈 Alinea todo a la izquierda */
+    text-align: left;
     background: rgba(5,8,20,0.98);
     border-top: 1px solid rgba(0,224,255,0.2);
-    padding: 20px 20px;        /* 👈 Añade margen interno solo lateral */
+    padding: 20px 20px;
     gap: 18px;
     transform: translateY(-200%);
     transition: transform 0.35s ease;
   }
   nav.open { transform: translateY(0); }
   .menu-toggle { display: flex; }
-  nav a {
-    width: 100%;
-    display: block;
-  }
+  nav a { width: 100%; display: block; }
 }
-
 </style>
 </head>
 
 <body>
-<!-- 🔹 HEADER COMPLETO CON MENÚ RESPONSIVE -->
 <header>
-  <!-- 🔸 Botón del menú a la izquierda -->
+  <!-- 🔸 Botón menú -->
   <div class="menu-toggle" id="menuToggle">
     <span></span>
     <span></span>
@@ -124,12 +131,12 @@ nav a:hover,nav a.active{
     <a href="calculadoraparatelegram.html">Calculadora</a>
     <a href="diario.html">Diario</a>
     <a href="https://promote.mexc.com/b/REALTIMEMewTraderESP" target="_blank">Operaciones Real Time</a>
-    <a href="https://t.me/+-ls_RzCNaoNmN2Fk" target="_blank">Canal Telegram</a>
+    <a href="https://t.me/MewTraderESP" target="_blank">Canal Telegram</a>
   </nav>
 </header>
 
 <script>
-// Control del menú responsive
+// Menú responsive
 const menuToggle=document.getElementById("menuToggle");
 const mainNav=document.getElementById("mainNav");
 menuToggle.addEventListener("click",()=>{
@@ -137,11 +144,10 @@ menuToggle.addEventListener("click",()=>{
   menuToggle.classList.toggle("active");
 });
 
-// Marca automáticamente el enlace activo
+// Enlace activo automático
 document.querySelectorAll("nav a").forEach(a=>{
   if(a.href===location.href){a.classList.add("active");}
 });
 </script>
 </body>
 </html>
-
