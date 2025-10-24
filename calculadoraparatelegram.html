@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <meta name="robots" content="noindex,nofollow">
 <title>Mew Trader_ESP · Calculadora de Precio Promedio & Stop Loss</title>
 
@@ -14,81 +14,51 @@
   --fg:#e8eef7;--muted:#7b8aa0;--accent:#00ffff;
   --accent2:#a020f0;--danger:#ff5a7d;
 }
-*{box-sizing:border-box;margin:0;padding:0}
 
-/* BODY y GENERAL */
-html, body {
-  width: 100%;
-  overflow-x: hidden;
-  font-family: 'Orbitron', sans-serif;
-}
-body {
-  background: radial-gradient(circle at top left, var(--bg1), var(--bg2));
-  color: var(--fg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 0 5vw 24px 5vw;
-  text-shadow: 0 0 5px rgba(255,255,255,0.1);
+/* GENERAL */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Orbitron',sans-serif;}
+body{
+  background:radial-gradient(circle at top left,var(--bg1),var(--bg2));
+  color:var(--fg);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding:0 5vw 24px 5vw;
+  text-shadow:0 0 5px rgba(255,255,255,0.1);
+  overflow-x:hidden;
 }
 
 /* APP */
-.app {
-  width: 100%;
-  max-width: 100%;
-  padding: 0;
-  box-sizing: border-box;
+.app{width:100%;max-width:980px;}
+.title{
+  text-align:center;font-size:clamp(20px,2.6vw,28px);font-weight:700;
+  margin:0 0 10px;color:var(--accent);text-shadow:0 0 8px var(--accent2);
 }
-.title {
-  text-align: center;
-  font-size: clamp(20px,2.6vw,28px);
-  font-weight: 700;
-  margin: 0 0 10px;
-  color: var(--accent);
-  text-shadow: 0 0 8px var(--accent2);
-}
-.subtitle {
-  text-align: center;
-  color: var(--muted);
-  margin: 0 0 22px;
-  font-size: 14px;
+.subtitle{
+  text-align:center;color:var(--muted);margin:0 0 22px;font-size:14px;
 }
 
 /* GRID */
-.grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-  width: 100%;
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;}
+.card{
+  grid-column:span 12;
+  background:rgba(20,15,30,0.95);
+  border:1px solid rgba(0,255,255,0.15);
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 0 25px rgba(0,255,255,0.05);
+  backdrop-filter:blur(5px);
 }
-.card {
-  grid-column: span 1;
-  background: rgba(20,15,30,0.95);
-  border: 1px solid rgba(0,255,255,0.15);
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 0 25px rgba(0,255,255,0.05);
-  backdrop-filter: blur(5px);
-}
-@media (min-width: 860px) {
-  .grid { grid-template-columns: repeat(12, 1fr); }
-  .card.half { grid-column: span 6; }
-}
+@media(min-width:860px){.card.half{grid-column:span 6;}}
 
-/* ROWS */
-.row {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-@media (min-width: 600px) {
-  .row { grid-template-columns: 1fr 1fr; }
-}
-
-/* CAMPOS */
-.field {display:flex;flex-direction:column;gap:6px;}
+h3{margin:0 0 14px;color:var(--accent2);text-shadow:0 0 8px var(--accent2);}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.field{display:flex;flex-direction:column;gap:6px;}
 label{font-size:12px;color:var(--muted);letter-spacing:.4px;}
+
+/* INPUTS */
 .input{
   background:rgba(10,15,25,0.8);
   border:1px solid rgba(160,32,240,0.3);
@@ -155,84 +125,76 @@ button:hover{
   color:#fff;
   box-shadow:0 0 20px var(--accent2);
 }
-
-/* BLOQUE PRINCIPAL */
-.main-header {
-  text-align: center;
-  margin: 30px 0 40px;
-}
-.main-header h1 {
-  font-size: 2.4rem;
-  font-weight: 700;
-  color: var(--accent);
-  text-shadow: 0 0 15px var(--accent2);
-}
-.main-header img {
-  display: block;
-  margin: 20px auto;
-  border-radius: 20px;
-  max-width: 200px;
-  box-shadow: 0 0 15px rgba(0,255,255,0.3);
-}
-.main-header a {
-  color: var(--accent2);
-  text-decoration: none;
-  font-weight: 600;
-  transition: .3s;
-}
-.main-header a:hover {
-  color: var(--accent);
-  text-shadow: 0 0 10px var(--accent);
-}
 .muted{color:var(--muted);}
 .mono{font-family:ui-monospace,monospace;}
+
+/* BLOQUE PRINCIPAL */
+.main-header{text-align:center;margin:30px 0 40px;}
+.main-header h1{
+  font-size:2.4rem;font-weight:700;
+  color:var(--accent);
+  text-shadow:0 0 15px var(--accent2);
+}
+.main-header img{
+  display:block;
+  margin:20px auto;
+  border-radius:20px;
+  max-width:200px;
+  box-shadow:0 0 15px rgba(0,255,255,0.3);
+}
+.main-header a{
+  color:var(--accent2);
+  text-decoration:none;
+  font-weight:600;
+  transition:.3s;
+}
+.main-header a:hover{
+  color:var(--accent);
+  text-shadow:0 0 10px var(--accent);
+}
 </style>
 </head>
 
 <body>
   <!-- 🔹 Menú dinámico -->
   <div id="menu-container"></div>
-  <script>
-  fetch("menu.html")
-    .then(r => r.text())
-    .then(h => {
-      const container = document.getElementById("menu-container");
-      container.innerHTML = h;
+<script>
+fetch("menu.html")
+  .then(r => r.text())
+  .then(h => {
+    const container = document.getElementById("menu-container");
+    container.innerHTML = h;
 
-      // Reejecutar la lógica del menú hamburguesa
-      const script = document.createElement("script");
-      script.textContent = `
-        const menuToggle = document.getElementById("menuToggle");
-        const mainNav = document.getElementById("mainNav");
-        menuToggle?.addEventListener("click", () => {
-          mainNav?.classList.toggle("open");
-          menuToggle?.classList.toggle("active");
-        });
-      `;
-      container.appendChild(script);
+    const script = document.createElement("script");
+    script.textContent = `
+      const menuToggle = document.getElementById("menuToggle");
+      const mainNav = document.getElementById("mainNav");
+      menuToggle?.addEventListener("click", () => {
+        mainNav?.classList.toggle("open");
+        menuToggle?.classList.toggle("active");
+      });
+    `;
+    container.appendChild(script);
 
-      // 🔹 Ajustar margen superior dinámicamente una vez cargado el menú
-      const menu = container.querySelector("header");
-      if (menu) {
-        const height = menu.offsetHeight || 90;
-        document.body.style.marginTop = height + "px";
-      }
-    });
-  </script>
+    const menu = container.querySelector("header");
+    if (menu) {
+      const height = menu.offsetHeight || 90;
+      document.body.style.marginTop = height + "px";
+    }
+  });
+</script>
 
   <!-- 🔹 Bloque QR + título -->
   <div class="main-header">
     <h1>Mew Trader_ESP</h1>
     <img src="qr_telegram.png" alt="QR Telegram Mew Trader" width="200" height="200">
-    <p><a href="https://t.me/+7AQfPAfGrO44ZjQ0" target="_blank">https://t.me/MewTraderESP</a></p>
+    <p><a href="https://t.me/MewTraderESP" target="_blank">https://t.me/MewTraderESP</a></p>
   </div>
 
   <!-- 🔹 Aplicación -->
   <div class="app">
     <h2 class="title">Calculadora de Precio Promedio & Stop Loss</h2>
-    <p class="subtitle">
-      Entradas escalonadas <strong>15% / 30% / 55%</strong>. Calcula precio medio y SL para LONG/SHORT según capital, apalancamiento y riesgo máximo.
-    </p>
+    <p class="subtitle">Entradas escalonadas <strong>15% / 30% / 55%</strong>. Calcula precio medio y SL para LONG/SHORT según capital, apalancamiento y riesgo máximo.</p>
 
     <div class="grid">
       <section class="card half">
@@ -242,10 +204,8 @@ button:hover{
           <div class="field"><label>Apalancamiento (x)</label><input id="lev" class="input" type="number" value="10"></div>
         </div>
         <div class="row" style="margin-bottom:10px">
-          <div class="field"><label>Riesgo máximo (%)</label><input id="risk" class="input" type="number" value="30"></div>
-          <div class="field"><label>Pesos fijos</label>
-            <div class="weights"><span class="pill">15%</span><span class="pill">30%</span><span class="pill">55%</span></div>
-          </div>
+          <div class="field"><label>Riesgo máximo (%)</label><input id="risk" class="input" type="number" value="20"></div>
+          <div class="field"><label>Pesos fijos</label><div class="weights"><span class="pill">15%</span><span class="pill">30%</span><span class="pill">55%</span></div></div>
         </div>
         <div class="row">
           <div class="field"><label>Entrada 1 (15%)</label><input id="p1" class="input" type="number" value="100000"></div>
@@ -253,9 +213,7 @@ button:hover{
         </div>
         <div class="row" style="margin-top:10px">
           <div class="field"><label>Entrada 3 (55%)</label><input id="p3" class="input" type="number" value="96800"></div>
-          <div class="field"><label>Riesgo en USD</label>
-            <div class="result"><span class="res-title">Riesgo</span><span id="riskUsd" class="res-value bad mono">$0.00</span></div>
-          </div>
+          <div class="field"><label>Riesgo en USD</label><div class="result"><span class="res-title">Riesgo</span><span id="riskUsd" class="res-value bad mono">$0.00</span></div></div>
         </div>
         <div class="footer">
           <button id="reset">Restablecer</button>
@@ -271,12 +229,8 @@ button:hover{
         </div>
         <div id="detalleEntradas" style="margin-top:10px;color:#cbd6e8;font-size:13px;line-height:1.6"></div>
         <div class="row" style="margin-top:14px">
-          <div class="field"><label>Stop Loss (LONG)</label>
-            <div class="result"><span class="res-title">Promedio − pérdida</span><span id="slLong" class="res-value bad mono">—</span></div>
-          </div>
-          <div class="field"><label>Stop Loss (SHORT)</label>
-            <div class="result"><span class="res-title">Promedio + pérdida</span><span id="slShort" class="res-value bad mono">—</span></div>
-          </div>
+          <div class="field"><label>Stop Loss (LONG)</label><div class="result"><span class="res-title">Promedio − pérdida</span><span id="slLong" class="res-value bad mono">—</span></div></div>
+          <div class="field"><label>Stop Loss (SHORT)</label><div class="result"><span class="res-title">Promedio + pérdida</span><span id="slShort" class="res-value bad mono">—</span></div></div>
         </div>
       </section>
     </div>
@@ -316,18 +270,45 @@ button:hover{
       out.riskUsd.textContent=fmtUSD(riskUsd);
 
       let html="";
-      precios.forEach((precio,i)=>{
-        html+=`<p>Entrada ${i+1} a <strong>${fmtUSD(precio)}</strong> → inversión <strong>${fmtUSD(montos[i])}</strong> (${(pesos[i]*100).toFixed(0)}% del capital)</p>`;
-      });
+      precios.forEach((precio,i)=>{html+=`<p>Entrada ${i+1} a <strong>${fmtUSD(precio)}</strong> → inversión <strong>${fmtUSD(montos[i])}</strong> (${(pesos[i]*100).toFixed(0)}% del capital)</p>`;});
       $('detalleEntradas').innerHTML=html;
     }
 
     ['capital','lev','risk','p1','p2','p3'].forEach(id=>$(id).addEventListener('input',calc));
-    $('reset').addEventListener('click',()=>{$('capital').value=100;$('lev').value=10;$('risk').value=30;$('p1').value=100000;$('p2').value=98500;$('p3').value=96800;calc();});
-    $('copy').addEventListener('click',async()=>{const txt=document.body.innerText;await navigator.clipboard.writeText(txt);alert('Resultados copiados.');});
+    $('reset').addEventListener('click',()=>{$('capital').value=100;$('lev').value=10;$('risk').value=20;$('p1').value=100000;$('p2').value=98500;$('p3').value=96800;calc();});
+
+    // 📋 Copia formateada (Telegram-ready)
+    $('copy').addEventListener('click', async () => {
+      const avg = $('avg').textContent.trim();
+      const slLong = $('slLong').textContent.trim();
+      const slShort = $('slShort').textContent.trim();
+      const riskUsd = $('riskUsd').textContent.trim();
+      const riskPct = $('risk').value + "%";
+      const detalle = $('detalleEntradas').innerText.trim();
+
+      const texto =
+`📊 *Resultados de la Calculadora Mew Trader_ESP*
+
+💠 *Precio Promedio:* ${avg}
+
+${detalle}
+
+🛡️ *Stop Loss (LONG):* ${slLong}
+⚔️ *Stop Loss (SHORT):* ${slShort}
+
+🎯 *Riesgo máximo:* ${riskPct}
+💰 *Riesgo en USD:* ${riskUsd}`;
+
+      try {
+        await navigator.clipboard.writeText(texto);
+        alert('✅ Resultados copiados con formato Telegram-ready.');
+      } catch (err) {
+        alert('⚠️ No se pudo copiar los resultados.');
+      }
+    });
+
     calc();
   })();
   </script>
 </body>
 </html>
-
