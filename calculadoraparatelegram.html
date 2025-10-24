@@ -136,6 +136,19 @@ button.glow {
   animation: glowCopy 1.5s ease-out;
 }
 
+/* FRASE DEL DÍA */
+#frase-dia{
+  font-size:1.2rem;
+  color:#ff59f9;
+  text-shadow:0 0 12px rgba(255,89,249,0.7);
+  margin-bottom:12px;
+  display:block;
+  max-width:90%;
+  margin-left:auto;
+  margin-right:auto;
+  text-align:center;
+}
+
 .muted{color:var(--muted);}
 .mono{font-family:ui-monospace,monospace;}
 
@@ -148,7 +161,7 @@ button.glow {
 }
 .main-header img{
   display:block;
-  margin:20px auto;
+  margin:10px auto 10px auto;
   border-radius:20px;
   max-width:200px;
   box-shadow:0 0 15px rgba(0,255,255,0.3);
@@ -190,9 +203,10 @@ fetch("menu.html")
   });
 </script>
 
-<!-- 🔹 Bloque QR + título -->
+<!-- 🔹 Bloque QR + título + frase -->
 <div class="main-header">
   <h1>Mew Trader_ESP</h1>
+  <span id="frase-dia">Cargando sabiduría del mercado...</span>
   <img src="qr_telegram.png" alt="QR Telegram Mew Trader" width="200" height="200">
   <p><a href="https://t.me/MewTraderESP" target="_blank">https://t.me/MewTraderESP</a></p>
 </div>
@@ -313,6 +327,16 @@ ${detalle}
       alert('⚠️ No se pudo copiar los resultados.');
     }
   });
+
+  // 🔹 Cargar frase aleatoria
+  fetch("frases.json")
+    .then(r=>r.json())
+    .then(d=>{
+      const frases=d.frases;
+      const frase=frases[Math.floor(Math.random()*frases.length)];
+      document.getElementById("frase-dia").textContent=frase;
+    })
+    .catch(()=>document.getElementById("frase-dia").textContent="Piensa fuera de la caja.");
 
   calc();
 })();
