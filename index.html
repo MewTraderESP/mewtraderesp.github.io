@@ -11,7 +11,8 @@
   --bg1:#05010a;
   --bg2:#0d0220;
   --accent:#00e0ff;
-  --accent-glow:rgba(0,224,255,0.45);
+  --accent2:#ff00ff;
+  --accent-glow:rgba(255,0,255,0.45);
   --text:#eaf7ff;
   --muted:#8aa3b8;
 }
@@ -29,7 +30,7 @@ body{
 }
 @keyframes glowPulse{
   0%,100%{box-shadow:0 0 25px var(--accent-glow);}
-  50%{box-shadow:0 0 60px var(--accent);}
+  50%{box-shadow:0 0 60px var(--accent2);}
 }
 
 /* HEADER NAV */
@@ -41,7 +42,7 @@ header{
   padding:16px 8%;
   background:rgba(10,14,25,0.6);
   backdrop-filter:blur(10px);
-  border-bottom:1px solid rgba(0,224,255,0.2);
+  border-bottom:1px solid rgba(255,0,255,0.2);
   position:fixed;
   top:0;left:0;
   z-index:1000;
@@ -95,10 +96,10 @@ nav a:hover{
     top:70px;left:0;
     width:100%;
     flex-direction:column;
-    align-items:flex-start;     /* 👈 alinea a la izquierda */
+    align-items:flex-start;
     text-align:left;
     background:rgba(5,8,20,0.98);
-    border-top:1px solid rgba(0,224,255,0.2);
+    border-top:1px solid rgba(255,0,255,0.2);
     padding:20px 20px;
     gap:18px;
     transform:translateY(-200%);
@@ -130,6 +131,26 @@ p{
   color:var(--muted);
   margin-bottom:30px;
 }
+
+/* FRASE DINÁMICA */
+#frase-dinamica{
+  font-size:1.2rem;
+  color:var(--accent2);
+  text-shadow:0 0 15px var(--accent2), 0 0 30px rgba(255,0,255,0.5);
+  margin-bottom:25px;
+  opacity:0;
+  animation:fadeIn 1.5s ease forwards, flicker 6s infinite;
+}
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(-8px);}
+  to{opacity:1;transform:translateY(0);}
+}
+@keyframes flicker{
+  0%,18%,22%,25%,53%,57%,100%{opacity:1;text-shadow:0 0 15px var(--accent2),0 0 30px rgba(255,0,255,0.5);}
+  20%,24%,55%{opacity:0.85;text-shadow:0 0 5px var(--accent2);}
+}
+
+/* BUTTONS */
 .buttons{
   display:flex;
   flex-wrap:wrap;
@@ -182,13 +203,8 @@ footer{
 </header>
 
 <main>
-  <!-- 🔹 Frase dinámica -->
-  <p id="frase-dinamica" style="
-    font-size:1.1rem;
-    color:#00e0ff;
-    text-shadow:0 0 12px rgba(0,224,255,0.6);
-    margin-bottom:20px;
-  "></p>
+  <!-- 🔹 Frase dinámica con efecto neón flicker -->
+  <p id="frase-dinamica"></p>
 
   <img src="mew_fuera_caja_transparent.png" alt="Mew Trader ESP Logo">
   <h1>Centro de Herramientas</h1>
@@ -198,7 +214,7 @@ footer{
     <button onclick="window.location.href='calculadoraparatelegram.html'">🧮 Calculadora de Riesgo</button>
     <button onclick="window.location.href='diario.html'">📘 Diario de Trading</button>
     <button onclick="window.open('https://promote.mexc.com/b/REALTIMEMewTraderESP','_blank')">📊 Operaciones en Tiempo Real</button>
-    <button onclick="window.open('https://t.me/MewTraderESP','_blank')">📢 Canal de Telegram</button>
+    <button onclick="window.open('https://t.me/+7AQfPAfGrO44ZjQ0','_blank')">📢 Canal de Telegram</button>
   </div>
 </main>
 
@@ -219,12 +235,16 @@ fetch("frases.json")
     const lista=data.frases||[];
     if(lista.length>0){
       const frase=lista[Math.floor(Math.random()*lista.length)];
-      document.getElementById("frase-dinamica").textContent=frase;
+      const el=document.getElementById("frase-dinamica");
+      el.textContent=frase;
+      el.style.opacity="1";
     }
   })
   .catch(err=>{
     console.error(err);
-    document.getElementById("frase-dinamica").textContent="Piensa fuera de la caja.";
+    const el=document.getElementById("frase-dinamica");
+    el.textContent="Piensa fuera de la caja.";
+    el.style.opacity="1";
   });
 </script>
 </body>
