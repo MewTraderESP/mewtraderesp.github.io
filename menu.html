@@ -79,24 +79,29 @@ nav a:hover,nav a.active{
 .menu-toggle.active span:nth-child(3){transform:translateY(-8px) rotate(-45deg);}
 
 @media(max-width:850px){
-  nav{
-    position:fixed;
-    top:70px;left:0;
-    width:100%;
-    flex-direction:column;
-    align-items:center;
-    background:rgba(5,8,20,0.97);
-    border-top:1px solid rgba(0,224,255,0.2);
-    padding:20px 0;
-    gap:18px;
-    transform:translateY(-150%);
-    transition:transform .35s ease;
-    overflow-y:auto;
-    max-height:calc(100vh - 70px);
+  nav {
+    position: absolute;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;   /* 👈 Alinea todo a la izquierda */
+    text-align: left;          /* 👈 Texto alineado a la izquierda */
+    background: rgba(5,8,20,0.98);
+    border-top: 1px solid rgba(0,224,255,0.2);
+    padding: 20px 20px;        /* 👈 Añade margen interno solo lateral */
+    gap: 18px;
+    transform: translateY(-200%);
+    transition: transform 0.35s ease;
   }
-  nav.open{transform:translateY(0);}
-  .menu-toggle{display:flex;}
+  nav.open { transform: translateY(0); }
+  .menu-toggle { display: flex; }
+  nav a {
+    width: 100%;
+    display: block;
+  }
 }
+
 </style>
 </head>
 
