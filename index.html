@@ -10,8 +10,8 @@
 :root{
   --bg1:#05010a;
   --bg2:#0d0220;
-  --accent:#00e0ff;
-  --accent2:#ff00ff;
+  --accent:#00e0ff;        /* Azul eléctrico */
+  --accent2:#ff00ff;       /* Rosa neón */
   --accent-glow:rgba(255,0,255,0.45);
   --text:#eaf7ff;
   --muted:#8aa3b8;
@@ -28,9 +28,11 @@ body{
   justify-content:flex-start;
   overflow-x:hidden;
 }
-@keyframes glowPulse{
-  0%,100%{box-shadow:0 0 25px var(--accent-glow);}
-  50%{box-shadow:0 0 60px var(--accent2);}
+
+/* 🔹 Animación del gato (azul eléctrico) */
+@keyframes glowBlue{
+  0%,100%{box-shadow:0 0 25px rgba(0,224,255,0.4);}
+  50%{box-shadow:0 0 60px var(--accent);}
 }
 
 /* HEADER NAV */
@@ -69,7 +71,7 @@ nav a{
 }
 nav a:hover{
   color:var(--accent);
-  text-shadow:0 0 10px var(--accent-glow);
+  text-shadow:0 0 10px rgba(0,224,255,0.6);
   background:rgba(0,224,255,0.08);
 }
 
@@ -87,7 +89,7 @@ nav a:hover{
   width:100%;height:3px;
   background:var(--accent);
   border-radius:3px;
-  box-shadow:0 0 10px var(--accent-glow);
+  box-shadow:0 0 10px rgba(0,224,255,0.5);
   transition:.3s;
 }
 @media(max-width:850px){
@@ -118,8 +120,8 @@ main{
 }
 main img{
   width:280px;
-  animation:glowPulse 3s infinite;
   border-radius:20px;
+  animation:glowBlue 3s infinite;  /* 🔹 Azul brillante */
 }
 h1{
   font-size:2.3rem;
@@ -203,7 +205,7 @@ footer{
 </header>
 
 <main>
-  <!-- 🔹 Frase dinámica con efecto neón flicker -->
+  <!-- 🔹 Frase dinámica en color rosa neón -->
   <p id="frase-dinamica"></p>
 
   <img src="mew_fuera_caja_transparent.png" alt="Mew Trader ESP Logo">
@@ -221,6 +223,7 @@ footer{
 <footer>© 2025 MewTrader_ESP · Todos los derechos reservados - Un Miua para todos</footer>
 
 <script>
+/* --- Menú responsive --- */
 const menuToggle=document.getElementById("menuToggle");
 const mainNav=document.getElementById("mainNav");
 menuToggle.addEventListener("click",()=>{
@@ -228,7 +231,7 @@ menuToggle.addEventListener("click",()=>{
   menuToggle.classList.toggle("active");
 });
 
-// 🔹 Cargar frase dinámica desde frases.json
+/* --- Frase dinámica --- */
 fetch("frases.json")
   .then(r=>r.ok?r.json():Promise.reject("No se pudo cargar frases.json"))
   .then(data=>{
@@ -246,6 +249,10 @@ fetch("frases.json")
     el.textContent="Piensa fuera de la caja.";
     el.style.opacity="1";
   });
+</script>
+</body>
+</html>
+
 </script>
 </body>
 </html>
