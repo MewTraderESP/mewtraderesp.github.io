@@ -32,8 +32,85 @@ body{
   50%{box-shadow:0 0 60px var(--accent);}
 }
 
+/* HEADER NAV */
+header{
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px 8%;
+  background:rgba(10,14,25,0.6);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(0,224,255,0.2);
+  position:fixed;
+  top:0;left:0;
+  z-index:1000;
+}
+.logo{
+  font-size:1.6rem;
+  font-weight:900;
+  color:var(--accent);
+  text-shadow:0 0 15px var(--accent);
+}
+nav{
+  display:flex;
+  align-items:center;
+  gap:20px;
+  transition:all .3s ease;
+}
+nav a{
+  color:var(--text);
+  text-decoration:none;
+  font-weight:600;
+  transition:.25s;
+  padding:6px 12px;
+  border-radius:6px;
+}
+nav a:hover{
+  color:var(--accent);
+  text-shadow:0 0 10px var(--accent-glow);
+  background:rgba(0,224,255,0.08);
+}
+
+/* MOBILE MENU */
+.menu-toggle{
+  display:none;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+  width:32px;height:26px;
+  gap:5px;
+}
+.menu-toggle span{
+  width:100%;height:3px;
+  background:var(--accent);
+  border-radius:3px;
+  box-shadow:0 0 10px var(--accent-glow);
+  transition:.3s;
+}
+@media(max-width:850px){
+  nav{
+    position:absolute;
+    top:70px;left:0;
+    width:100%;
+    flex-direction:column;
+    align-items:flex-start;     /* 👈 alinea a la izquierda */
+    text-align:left;
+    background:rgba(5,8,20,0.98);
+    border-top:1px solid rgba(0,224,255,0.2);
+    padding:20px 20px;
+    gap:18px;
+    transform:translateY(-200%);
+  }
+  nav.open{transform:translateY(0);}
+  .menu-toggle{display:flex;}
+  nav a{width:100%;display:block;}
+}
+
 /* MAIN */
 main{
+  margin-top:120px;
   text-align:center;
   max-width:900px;
   padding:0 20px;
@@ -92,39 +169,27 @@ footer{
 </head>
 
 <body>
-
-<!-- 🔹 Contenedor del menú -->
-<div id="menu-container"></div>
-
-<script>
-fetch("menu.html")
-  .then(r => r.text())
-  .then(h => {
-    const container = document.getElementById("menu-container");
-    container.innerHTML = h;
-
-    // 🔹 Reejecutar la lógica del menú hamburguesa al cargar
-    const script = document.createElement("script");
-    script.textContent = `
-      const menuToggle = document.getElementById("menuToggle");
-      const mainNav = document.getElementById("mainNav");
-      menuToggle?.addEventListener("click", () => {
-        mainNav?.classList.toggle("open");
-        menuToggle?.classList.toggle("active");
-      });
-    `;
-    container.appendChild(script);
-
-    // 🔹 Ajustar margen superior automáticamente según la altura del menú
-    const menu = container.querySelector("header");
-    if (menu) {
-      const height = menu.offsetHeight || 90;
-      document.body.style.marginTop = height + "px";
-    }
-  });
-</script>
+<header>
+  <div class="menu-toggle" id="menuToggle"><span></span><span></span><span></span></div>
+  <div class="logo">Mew Trader_ESP</div>
+  <nav id="mainNav">
+    <a href="index.html">Inicio</a>
+    <a href="calculadoraparatelegram.html">Calculadora</a>
+    <a href="diario.html">Diario</a>
+    <a href="https://promote.mexc.com/b/REALTIMEMewTraderESP" target="_blank">Operaciones Real Time</a>
+    <a href="https://t.me/MewTraderESP" target="_blank">Canal Telegram</a>
+  </nav>
+</header>
 
 <main>
+  <!-- 🔹 Frase dinámica -->
+  <p id="frase-dinamica" style="
+    font-size:1.1rem;
+    color:#00e0ff;
+    text-shadow:0 0 12px rgba(0,224,255,0.6);
+    margin-bottom:20px;
+  "></p>
+
   <img src="mew_fuera_caja_transparent.png" alt="Mew Trader ESP Logo">
   <h1>Centro de Herramientas</h1>
   <p>Piensa fuera de la caja. Accede a las utilidades oficiales y al seguimiento de operaciones en tiempo real de <strong>Mew Trader_ESP</strong>.</p>
@@ -139,5 +204,28 @@ fetch("menu.html")
 
 <footer>© 2025 MewTrader_ESP · Todos los derechos reservados - Un Miua para todos</footer>
 
+<script>
+const menuToggle=document.getElementById("menuToggle");
+const mainNav=document.getElementById("mainNav");
+menuToggle.addEventListener("click",()=>{
+  mainNav.classList.toggle("open");
+  menuToggle.classList.toggle("active");
+});
+
+// 🔹 Cargar frase dinámica desde frases.json
+fetch("frases.json")
+  .then(r=>r.ok?r.json():Promise.reject("No se pudo cargar frases.json"))
+  .then(data=>{
+    const lista=data.frases||[];
+    if(lista.length>0){
+      const frase=lista[Math.floor(Math.random()*lista.length)];
+      document.getElementById("frase-dinamica").textContent=frase;
+    }
+  })
+  .catch(err=>{
+    console.error(err);
+    document.getElementById("frase-dinamica").textContent="Piensa fuera de la caja.";
+  });
+</script>
 </body>
 </html>
