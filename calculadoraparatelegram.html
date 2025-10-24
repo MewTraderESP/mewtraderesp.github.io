@@ -58,6 +58,21 @@ h3{margin:0 0 14px;color:var(--accent2);text-shadow:0 0 8px var(--accent2);}
 .field{display:flex;flex-direction:column;gap:6px;}
 label{font-size:12px;color:var(--muted);letter-spacing:.4px;}
 
+/* 🔧 Ajustes específicos para móviles */
+@media (max-width: 600px) {
+  body{padding:0 3vw 24px 3vw;}
+  .grid{gap:10px;}
+  .card{padding:16px;}
+  .row{grid-template-columns:1fr!important;gap:10px;}
+  .footer{flex-direction:column;align-items:stretch;}
+  button{width:100%;text-align:center;font-size:13px;padding:12px 0;}
+  .input{font-size:13px;padding:10px;}
+  label{font-size:11px;}
+  .weights{justify-content:center;}
+  #detalleEntradas{font-size:12px;line-height:1.5;}
+  #frase-dia{font-size:1.1rem;margin-bottom:8px;}
+}
+  
 /* INPUTS */
 .input{
   background:rgba(10,15,25,0.8);
@@ -136,17 +151,22 @@ button.glow {
   animation: glowCopy 1.5s ease-out;
 }
 
-/* FRASE DEL DÍA */
+/* 🌌 FRASE DEL DÍA con efecto neón palpitante */
 #frase-dia{
-  font-size:1.2rem;
+  font-size:1.4rem;
   color:#ff59f9;
-  text-shadow:0 0 12px rgba(255,89,249,0.7);
+  text-shadow:0 0 12px rgba(255,89,249,0.9),0 0 24px rgba(255,89,249,0.6);
   margin-bottom:12px;
   display:block;
   max-width:90%;
   margin-left:auto;
   margin-right:auto;
   text-align:center;
+  animation: pulseNeon 2.5s infinite ease-in-out;
+}
+@keyframes pulseNeon {
+  0%,100% {text-shadow:0 0 8px rgba(255,89,249,0.6),0 0 18px rgba(255,89,249,0.4);}
+  50% {text-shadow:0 0 20px rgba(255,89,249,1),0 0 40px rgba(255,89,249,0.8);}
 }
 
 .muted{color:var(--muted);}
@@ -154,11 +174,6 @@ button.glow {
 
 /* BLOQUE PRINCIPAL */
 .main-header{text-align:center;margin:30px 0 40px;}
-.main-header h1{
-  font-size:2.4rem;font-weight:700;
-  color:var(--accent);
-  text-shadow:0 0 15px var(--accent2);
-}
 .main-header img{
   display:block;
   margin:10px auto 10px auto;
@@ -203,9 +218,8 @@ fetch("menu.html")
   });
 </script>
 
-<!-- 🔹 Bloque QR + título + frase -->
+<!-- 🔹 Bloque QR + frase -->
 <div class="main-header">
-  <h1>Mew Trader_ESP</h1>
   <span id="frase-dia">Cargando sabiduría del mercado...</span>
   <img src="qr_telegram.png" alt="QR Telegram Mew Trader" width="200" height="200">
   <p><a href="https://t.me/MewTraderESP" target="_blank">https://t.me/MewTraderESP</a></p>
@@ -297,7 +311,7 @@ fetch("menu.html")
   ['capital','lev','risk','p1','p2','p3'].forEach(id=>$(id).addEventListener('input',calc));
   $('reset').addEventListener('click',()=>{$('capital').value=100;$('lev').value=10;$('risk').value=20;$('p1').value=100000;$('p2').value=98500;$('p3').value=96800;calc();});
 
-  // 📋 Copia formateada (Telegram-ready con animación de brillo)
+  // 📋 Copia formateada (Telegram-ready)
   $('copy').addEventListener('click', async () => {
     const avg=$('avg').textContent.trim();
     const slLong=$('slLong').textContent.trim();
