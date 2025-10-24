@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="robots" content="noindex,nofollow">
 <title>Mew Trader_ESP · Calculadora de Precio Promedio & Stop Loss</title>
 
@@ -12,149 +12,325 @@
 :root {
   --bg1:#05010a;--bg2:#0d0220;--card:#121822;
   --fg:#e8eef7;--muted:#7b8aa0;--accent:#00ffff;
-  --accent2:#a020f0;--danger:#ff5a7d;--pink:#ff00ff;
+  --accent2:#a020f0;--danger:#ff5a7d;
 }
-
-/* GENERAL */
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:'Orbitron',sans-serif;}
-body{
-  background:radial-gradient(circle at top left,var(--bg1),var(--bg2));
-  color:var(--fg);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:flex-start;
-  padding:0 5vw 24px 5vw;
-  text-shadow:0 0 5px rgba(255,255,255,0.1);
-  overflow-x:hidden;
-}
 
-/* ANIMACIONES */
-@keyframes neonPulse{
-  0%,100%{filter:drop-shadow(0 0 10px var(--accent)) drop-shadow(0 0 20px var(--accent2));transform:scale(1);}
-  50%{filter:drop-shadow(0 0 20px var(--accent2)) drop-shadow(0 0 40px var(--accent));transform:scale(1.03);}
+/* BODY y GENERAL */
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+  font-family: 'Orbitron', sans-serif;
 }
-@keyframes flicker {
-  0%,18%,22%,25%,53%,57%,100% {opacity:1;text-shadow:0 0 10px var(--pink),0 0 20px var(--pink),0 0 30px var(--pink);}
-  20%,24%,55% {opacity:0.4;text-shadow:none;}
+body {
+  background: radial-gradient(circle at top left, var(--bg1), var(--bg2));
+  color: var(--fg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 5vw 24px 5vw;
+  text-shadow: 0 0 5px rgba(255,255,255,0.1);
 }
 
 /* APP */
-.app{width:100%;max-width:980px;}
-.title{text-align:center;font-size:clamp(20px,2.6vw,28px);font-weight:700;margin:0 0 10px;color:var(--accent);text-shadow:0 0 8px var(--accent2);}
-.subtitle{text-align:center;color:var(--muted);margin:0 0 22px;font-size:14px;}
+.app {
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  box-sizing: border-box;
+}
+.title {
+  text-align: center;
+  font-size: clamp(20px,2.6vw,28px);
+  font-weight: 700;
+  margin: 0 0 10px;
+  color: var(--accent);
+  text-shadow: 0 0 8px var(--accent2);
+}
+.subtitle {
+  text-align: center;
+  color: var(--muted);
+  margin: 0 0 22px;
+  font-size: 14px;
+}
 
 /* GRID */
-.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;}
-.card{grid-column:span 12;background:rgba(20,15,30,0.95);border:1px solid rgba(0,255,255,0.15);border-radius:16px;padding:20px;box-shadow:0 0 25px rgba(0,255,255,0.05);backdrop-filter:blur(5px);}
-@media(min-width:860px){.card.half{grid-column:span 6;}}
-h3{margin:0 0 14px;color:var(--accent2);text-shadow:0 0 8px var(--accent2);}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.field{display:flex;flex-direction:column;gap:6px;}
-label{font-size:12px;color:var(--muted);letter-spacing:.4px;}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  width: 100%;
+}
+.card {
+  grid-column: span 1;
+  background: rgba(20,15,30,0.95);
+  border: 1px solid rgba(0,255,255,0.15);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 0 25px rgba(0,255,255,0.05);
+  backdrop-filter: blur(5px);
+}
+@media (min-width: 860px) {
+  .grid { grid-template-columns: repeat(12, 1fr); }
+  .card.half { grid-column: span 6; }
+}
 
-/* INPUTS */
-.input{background:rgba(10,15,25,0.8);border:1px solid rgba(160,32,240,0.3);border-radius:12px;padding:12px;font-size:14px;color:var(--fg);outline:none;transition:all .2s ease;box-shadow:0 0 10px rgba(160,32,240,0.1);}
-.input:focus{border-color:var(--accent);box-shadow:0 0 12px var(--accent);}
+/* ROWS */
+.row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 600px) {
+  .row { grid-template-columns: 1fr 1fr; }
+}
+
+/* CAMPOS */
+.field {display:flex;flex-direction:column;gap:6px;}
+label{font-size:12px;color:var(--muted);letter-spacing:.4px;}
+.input{
+  background:rgba(10,15,25,0.8);
+  border:1px solid rgba(160,32,240,0.3);
+  border-radius:12px;
+  padding:12px;
+  font-size:14px;
+  color:var(--fg);
+  outline:none;
+  transition:all .2s ease;
+  box-shadow:0 0 10px rgba(160,32,240,0.1);
+}
+.input:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 12px var(--accent);
+}
 
 /* PILLS */
 .weights{display:flex;gap:8px;flex-wrap:wrap;}
-.pill{background:rgba(20,20,40,0.9);border:1px solid rgba(0,255,255,0.2);color:var(--accent);border-radius:999px;padding:6px 10px;font-size:12px;text-shadow:0 0 5px rgba(0,255,255,0.5);}
+.pill{
+  background:rgba(20,20,40,0.9);
+  border:1px solid rgba(0,255,255,0.2);
+  color:var(--accent);
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:12px;
+  text-shadow:0 0 5px rgba(0,255,255,0.5);
+}
 
 /* RESULTADOS */
-.result{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid rgba(0,255,255,0.1);border-radius:10px;background:linear-gradient(180deg,rgba(10,15,25,0.8),rgba(15,20,35,0.6));box-shadow:inset 0 0 10px rgba(0,255,255,0.08);}
+.result{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;
+  border:1px solid rgba(0,255,255,0.1);
+  border-radius:10px;
+  background:linear-gradient(180deg,rgba(10,15,25,0.8),rgba(15,20,35,0.6));
+  box-shadow:inset 0 0 10px rgba(0,255,255,0.08);
+}
 .res-title{font-size:12px;color:var(--muted);}
-.res-value{font-variant-numeric:tabular-nums;font-weight:700;letter-spacing:.3px;}
+.res-value{
+  font-variant-numeric:tabular-nums;
+  font-weight:700;
+  letter-spacing:.3px;
+}
 .accent{color:var(--accent);text-shadow:0 0 8px var(--accent2);}
 .bad{color:var(--danger);}
 
 /* BOTONES */
 .footer{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
-button{cursor:pointer;border:1px solid rgba(0,255,255,0.3);background:linear-gradient(90deg,var(--accent2),var(--accent));color:#000;border-radius:12px;padding:10px 14px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;transition:all .3s ease;box-shadow:0 0 10px rgba(0,255,255,0.2);}
-button:hover{background:var(--accent2);color:#fff;box-shadow:0 0 20px var(--accent2);}
-.muted{color:var(--muted);}
-.mono{font-family:ui-monospace,monospace;}
+button{
+  cursor:pointer;
+  border:1px solid rgba(0,255,255,0.3);
+  background:linear-gradient(90deg,var(--accent2),var(--accent));
+  color:#000;
+  border-radius:12px;
+  padding:10px 14px;
+  font-weight:700;
+  letter-spacing:.3px;
+  text-transform:uppercase;
+  transition:all .3s ease;
+  box-shadow:0 0 10px rgba(0,255,255,0.2);
+}
+button:hover{
+  background:var(--accent2);
+  color:#fff;
+  box-shadow:0 0 20px var(--accent2);
+}
 
 /* BLOQUE PRINCIPAL */
-.main-header{text-align:center;margin:30px 0 40px;}
-.main-header h1{font-size:2.4rem;font-weight:700;color:var(--accent);text-shadow:0 0 15px var(--accent2);}
-.main-header img{
-  display:block;
-  margin:20px auto;
-  border-radius:20px;
-  max-width:200px;
-  box-shadow:0 0 15px rgba(0,255,255,0.3);
-  animation:neonPulse 3s infinite ease-in-out;
+.main-header {
+  text-align: center;
+  margin: 30px 0 40px;
 }
-.main-header a{color:var(--accent2);text-decoration:none;font-weight:600;transition:.3s;}
-.main-header a:hover{color:var(--accent);text-shadow:0 0 10px var(--accent);}
-.frase{
-  color:var(--pink);
-  text-shadow:0 0 10px var(--pink),0 0 20px var(--pink);
-  font-weight:700;
-  font-size:1rem;
-  animation:flicker 3s infinite;
-  margin-top:10px;
+.main-header h1 {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-shadow: 0 0 15px var(--accent2);
 }
+.main-header img {
+  display: block;
+  margin: 20px auto;
+  border-radius: 20px;
+  max-width: 200px;
+  box-shadow: 0 0 15px rgba(0,255,255,0.3);
+}
+.main-header a {
+  color: var(--accent2);
+  text-decoration: none;
+  font-weight: 600;
+  transition: .3s;
+}
+.main-header a:hover {
+  color: var(--accent);
+  text-shadow: 0 0 10px var(--accent);
+}
+.muted{color:var(--muted);}
+.mono{font-family:ui-monospace,monospace;}
 </style>
 </head>
 
 <body>
-<!-- 🔹 Menú dinámico -->
-<div id="menu-container"></div>
-<script>
-fetch("menu.html")
-  .then(r => r.text())
-  .then(h => {
-    const container = document.getElementById("menu-container");
-    container.innerHTML = h;
-    const script = document.createElement("script");
-    script.textContent = `
-      const menuToggle = document.getElementById("menuToggle");
-      const mainNav = document.getElementById("mainNav");
-      menuToggle?.addEventListener("click", () => {
-        mainNav?.classList.toggle("open");
-        menuToggle?.classList.toggle("active");
-      });
-    `;
-    container.appendChild(script);
-    const menu = container.querySelector("header");
-    if (menu) document.body.style.marginTop = (menu.offsetHeight || 90) + "px";
-  });
-</script>
+  <!-- 🔹 Menú dinámico -->
+  <div id="menu-container"></div>
+  <script>
+  fetch("menu.html")
+    .then(r => r.text())
+    .then(h => {
+      const container = document.getElementById("menu-container");
+      container.innerHTML = h;
 
-<!-- 🔹 Bloque QR + título -->
-<div class="main-header">
-  <h1>Mew Trader_ESP</h1>
-  <img src="qr_telegram.png" alt="QR Telegram Mew Trader" width="200" height="200">
-  <p><a href="https://t.me/MewTraderESP" target="_blank">https://t.me/MewTraderESP</a></p>
-  <p id="frase" class="frase"></p>
-</div>
+      // Reejecutar la lógica del menú hamburguesa
+      const script = document.createElement("script");
+      script.textContent = `
+        const menuToggle = document.getElementById("menuToggle");
+        const mainNav = document.getElementById("mainNav");
+        menuToggle?.addEventListener("click", () => {
+          mainNav?.classList.toggle("open");
+          menuToggle?.classList.toggle("active");
+        });
+      `;
+      container.appendChild(script);
 
-<!-- 🔹 Calculadora -->
-<div class="app">
-  <h2 class="title">Calculadora de Precio Promedio & Stop Loss</h2>
-  <p class="subtitle">Entradas escalonadas <strong>15% / 30% / 55%</strong>. Calcula precio medio y SL para LONG/SHORT según capital, apalancamiento y riesgo máximo.</p>
+      // 🔹 Ajustar margen superior dinámicamente una vez cargado el menú
+      const menu = container.querySelector("header");
+      if (menu) {
+        const height = menu.offsetHeight || 90;
+        document.body.style.marginTop = height + "px";
+      }
+    });
+  </script>
 
-  <div class="grid">
-    <!-- tu bloque original de calculadora -->
-    <!-- (sin cambios, se mantiene todo igual) -->
+  <!-- 🔹 Bloque QR + título -->
+  <div class="main-header">
+    <h1>Mew Trader_ESP</h1>
+    <img src="qr_telegram.png" alt="QR Telegram Mew Trader" width="200" height="200">
+    <p><a href="https://t.me/+7AQfPAfGrO44ZjQ0" target="_blank">https://t.me/MewTraderESP</a></p>
   </div>
-</div>
 
-<script>
-// 💬 Cargar frase aleatoria desde frases.json
-fetch("frases.json")
-  .then(r => r.json())
-  .then(data => {
-    const all = Object.values(data).flat();
-    const random = all[Math.floor(Math.random() * all.length)];
-    document.getElementById("frase").textContent = random.frase || random;
-  })
-  .catch(()=>{document.getElementById("frase").textContent="El mercado premia la disciplina, no la emoción.";});
-</script>
+  <!-- 🔹 Aplicación -->
+  <div class="app">
+    <h2 class="title">Calculadora de Precio Promedio & Stop Loss</h2>
+    <p class="subtitle">
+      Entradas escalonadas <strong>15% / 30% / 55%</strong>. Calcula precio medio y SL para LONG/SHORT según capital, apalancamiento y riesgo máximo.
+    </p>
+
+    <div class="grid">
+      <section class="card half">
+        <h3>Parámetros</h3>
+        <div class="row" style="margin-bottom:10px">
+          <div class="field"><label>Capital total (USD)</label><input id="capital" class="input" type="number" value="100"></div>
+          <div class="field"><label>Apalancamiento (x)</label><input id="lev" class="input" type="number" value="10"></div>
+        </div>
+        <div class="row" style="margin-bottom:10px">
+          <div class="field"><label>Riesgo máximo (%)</label><input id="risk" class="input" type="number" value="30"></div>
+          <div class="field"><label>Pesos fijos</label>
+            <div class="weights"><span class="pill">15%</span><span class="pill">30%</span><span class="pill">55%</span></div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Entrada 1 (15%)</label><input id="p1" class="input" type="number" value="100000"></div>
+          <div class="field"><label>Entrada 2 (30%)</label><input id="p2" class="input" type="number" value="98500"></div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="field"><label>Entrada 3 (55%)</label><input id="p3" class="input" type="number" value="96800"></div>
+          <div class="field"><label>Riesgo en USD</label>
+            <div class="result"><span class="res-title">Riesgo</span><span id="riskUsd" class="res-value bad mono">$0.00</span></div>
+          </div>
+        </div>
+        <div class="footer">
+          <button id="reset">Restablecer</button>
+          <button id="copy">Copiar resultados</button>
+        </div>
+      </section>
+
+      <section class="card half">
+        <h3>Resultados</h3>
+        <div class="field" style="margin-bottom:12px">
+          <label>Precio promedio</label>
+          <div class="result"><span class="res-title">USD por unidad</span><span id="avg" class="res-value accent mono">—</span></div>
+        </div>
+        <div id="detalleEntradas" style="margin-top:10px;color:#cbd6e8;font-size:13px;line-height:1.6"></div>
+        <div class="row" style="margin-top:14px">
+          <div class="field"><label>Stop Loss (LONG)</label>
+            <div class="result"><span class="res-title">Promedio − pérdida</span><span id="slLong" class="res-value bad mono">—</span></div>
+          </div>
+          <div class="field"><label>Stop Loss (SHORT)</label>
+            <div class="result"><span class="res-title">Promedio + pérdida</span><span id="slShort" class="res-value bad mono">—</span></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    const $=id=>document.getElementById(id);
+    const fmtUSD=v=>isFinite(v)?new Intl.NumberFormat('es-ES',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(v):'—';
+    const out={avg:$('avg'),slLong:$('slLong'),slShort:$('slShort'),riskUsd:$('riskUsd')};
+
+    function calc(){
+      const capital=+$('capital').value||0,lev=Math.max(1,+$('lev').value||0),riskPct=Math.max(0,+$('risk').value||0);
+      const p1=+$('p1').value||0,p2=+$('p2').value||0,p3=+$('p3').value||0;
+      if(!(p1>0&&p2>0&&p3>0&&capital>0&&lev>=1)){
+        Object.values(out).forEach(e=>e.textContent='—');
+        $('detalleEntradas').innerHTML='';
+        return;
+      }
+
+      const pesos=[0.15,0.30,0.55];
+      const precios=[p1,p2,p3];
+      const montos=pesos.map(p=>capital*p);
+      const qtys=montos.map((m,i)=>m/precios[i]);
+      const totalQty=qtys.reduce((a,b)=>a+b,0);
+      const avg=capital/totalQty;
+      const riskUsd=capital*(riskPct/100);
+      const nominal=capital*lev;
+      const qtyNom=nominal/avg;
+      const lossPerBTC=riskUsd/qtyNom;
+      const slLong=avg-lossPerBTC;
+      const slShort=avg+lossPerBTC;
+
+      out.avg.textContent=fmtUSD(avg);
+      out.slLong.textContent=fmtUSD(slLong);
+      out.slShort.textContent=fmtUSD(slShort);
+      out.riskUsd.textContent=fmtUSD(riskUsd);
+
+      let html="";
+      precios.forEach((precio,i)=>{
+        html+=`<p>Entrada ${i+1} a <strong>${fmtUSD(precio)}</strong> → inversión <strong>${fmtUSD(montos[i])}</strong> (${(pesos[i]*100).toFixed(0)}% del capital)</p>`;
+      });
+      $('detalleEntradas').innerHTML=html;
+    }
+
+    ['capital','lev','risk','p1','p2','p3'].forEach(id=>$(id).addEventListener('input',calc));
+    $('reset').addEventListener('click',()=>{$('capital').value=100;$('lev').value=10;$('risk').value=30;$('p1').value=100000;$('p2').value=98500;$('p3').value=96800;calc();});
+    $('copy').addEventListener('click',async()=>{const txt=document.body.innerText;await navigator.clipboard.writeText(txt);alert('Resultados copiados.');});
+    calc();
+  })();
+  </script>
 </body>
 </html>
+
+
 
 
