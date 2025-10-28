@@ -1,296 +1,228 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Libros · Mew Trader ESP</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Libros · Mew Trader ESP</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ====== Tema Mew Trader ESP · Neon ====== */
+:root{
+  --bg:#070911;
+  --card:#0e1525;
+  --card-2:#0b1220;
+  --text:#cfe7ff;
+  --muted:#86a2bd;
+  --accent:#00e3ff;
+  --accent-2:#00ffa8;
+  --warning:#ffb703;
+  --radius:16px;
 
-  <!-- Fuente Orbitron para estética neon/arcane -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet" />
+  /* Tamaño “tipo libro” */
+  --cover-width: 260px;      /* ⇦ ajusta ancho */
+  --cover-aspect: 2/3;       /* ⇦ 2:3 formato libro vertical */
+  --cover-radius: 14px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:
+  radial-gradient(1200px 800px at 10% -10%, #0a1630 0%, transparent 60%),
+  radial-gradient(1000px 700px at 110% 20%, #071a29 0%, transparent 55%),
+  var(--bg);
+  color:var(--text);
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+}
 
-  <style>
-    :root{
-      --bg1:#05010a; --bg2:#0a0616; --fg:#e6fbff; --muted:#9ad7e0;
-      --teal:#00ffe0; --mag:#ff00c8; --bd:#133a44; --bd2:#1b4d59;
-    }
-    *{ box-sizing:border-box }
-    html,body{ height:100% }
-    body{
-      margin:0; color:var(--fg);
-      background:
-        radial-gradient(1200px 800px at 70% -10%, #111 0%, transparent 60%),
-        radial-gradient(1200px 800px at 10% 120%, #120017 0%, transparent 60%),
-        linear-gradient(180deg, var(--bg1), var(--bg2));
-      font-family:system-ui,Segoe UI,Roboto,Inter,sans-serif;
-    }
+/* ====== Layout ====== */
+.header{max-width:1200px;margin:28px auto 0;padding:0 20px}
+.grid{
+  max-width:1200px;margin:18px auto 40px;padding:0 20px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:26px;
+}
 
-    /* Contenedor principal */
-    main{ max-width:1200px; margin:0 auto; padding:10px 16px 28px }
+/* Tarjeta */
+.libro-card{
+  background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,0) 40%),var(--card);
+  border-radius:var(--radius);
+  box-shadow:inset 0 0 0 1px rgba(0,255,255,.14),0 20px 40px rgba(0,0,0,.35);
+  padding:18px 18px 16px;display:flex;flex-direction:column;gap:14px;
+}
 
-    /* Título */
-    h1{
-      font-family:Orbitron,sans-serif; font-weight:700; letter-spacing:.5px;
-      margin:10px 0 10px; font-size:clamp(22px,3.2vw,34px);
-      text-shadow:0 0 10px rgba(0,255,224,.35), 0 0 18px rgba(255,0,200,.18);
-    }
+/* ===== Portadas tipo LIBRO ===== */
+.libro-card .portada,
+.libro-card .portada-placeholder{
+  position:relative;width:var(--cover-width);
+  aspect-ratio:var(--cover-aspect);
+  border-radius:var(--cover-radius);
+  box-shadow:0 0 0 1px rgba(0,255,255,.18),0 10px 28px rgba(0,255,255,.10);
+  overflow:hidden;display:block;margin:0 auto;
+}
+.libro-card .portada{width:100%;height:100%;object-fit:cover;display:block}
+.libro-card .portada-placeholder{
+  background:radial-gradient(120% 120% at 20% 10%, rgba(0,255,255,.08), rgba(0,0,0,.6));
+  color:#bcd;font-weight:600;letter-spacing:.3px;
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;
+}
+.libro-card .portada::before,
+.libro-card .portada-placeholder::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(90deg, rgba(0,0,0,.35) 0%, rgba(255,255,255,.10) 12%, rgba(0,0,0,.18) 24%, transparent 40%);
+  pointer-events:none;
+}
+.libro-card .portada::after,
+.libro-card .portada-placeholder::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.06), inset 0 0 32px rgba(0,255,255,.05);
+  pointer-events:none;
+}
+.libro-card .portada:hover,
+.libro-card .portada-placeholder:hover{
+  transform:translateY(-2px);
+  box-shadow:0 0 0 1px rgba(0,255,255,.24),0 14px 32px rgba(0,255,255,.16);
+  transition:transform .18s ease, box-shadow .18s ease;
+}
 
-    /* Barra superior: buscador + estado */
-    .toolbar{ display:flex; gap:10px; align-items:center; margin:10px 0 16px }
-    #status{ opacity:.8 }
-    input#q{
-      flex:1; min-width:180px; padding:10px 12px; border-radius:12px;
-      border:1px solid var(--bd); background:#07101a; color:var(--fg); outline:none;
-      box-shadow:0 0 0 0 rgba(0,255,224,0); transition:.2s;
-    }
-    input#q:focus{ border-color:var(--bd2); box-shadow:0 0 0 3px rgba(0,255,224,.12) }
+/* Texto */
+.titulo{font-weight:700;line-height:1.2;color:var(--text);font-size:16px}
+.meta{color:var(--muted);font-size:12px}
 
-    /* Grid de tarjetas */
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fill, minmax(240px,1fr));
-      gap:14px;
-    }
+/* Botones */
+.btns{display:flex;gap:14px;margin-top:2px}
+.btn{
+  flex:1;display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  padding:10px 14px;border-radius:12px;border:1px solid rgba(0,255,255,.35);
+  background:linear-gradient(180deg,rgba(0,255,255,.12),rgba(0,255,255,.06));
+  color:var(--text);text-decoration:none;font-weight:700;letter-spacing:.3px;
+  box-shadow:0 0 16px rgba(0,255,255,.12) inset, 0 6px 18px rgba(0,0,0,.25);
+}
+.btn:hover{border-color:rgba(0,255,255,.55);box-shadow:0 0 18px rgba(0,255,255,.18) inset, 0 10px 24px rgba(0,0,0,.35)}
+.btn.secondary{border-color:rgba(0,255,168,.35);background:linear-gradient(180deg,rgba(0,255,168,.10),rgba(0,255,168,.06))}
+.footer{
+  max-width:1200px;margin:8px auto 40px;padding:0 20px;color:#9fb6cc;font-size:12px
+}
+.badge{display:inline-block;margin-left:auto;background:rgba(0,0,0,.35);border:1px solid rgba(0,255,255,.25);padding:10px 14px;border-radius:999px}
 
-    .card{
-      background:linear-gradient(180deg,#0b1320,#0b1522);
-      border:1px solid var(--bd); border-radius:16px; padding:12px;
-      box-shadow:0 0 18px rgba(0,255,230,.06), inset 0 0 0 1px rgba(0,234,255,.06);
-      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-    }
-    .card:hover{
-      transform:translateY(-2px); border-color:var(--bd2);
-      box-shadow:0 0 22px rgba(0,255,230,.14), 0 0 38px rgba(255,0,200,.12);
-    }
-
-    .thumb{
-      width:100%; aspect-ratio:16/10; border-radius:12px; overflow:hidden;
-      border:1px solid #12323a; background:linear-gradient(120deg,#07101a,#0a0f18);
-      display:flex; align-items:center; justify-content:center;
-    }
-    .thumb img{ width:100%; height:100%; object-fit:cover; display:block; filter:saturate(1.05) }
-    .thumb .ph{ opacity:.6; font-size:.92rem }
-
-    .name{ font-weight:700; margin:10px 2px 4px; word-break:break-word }
-    .meta{ font-size:.82rem; color:var(--muted); margin:0 2px 8px }
-
-    .btns{ display:flex; gap:8px }
-    a.btn{
-      flex:1; text-align:center; text-decoration:none; font-weight:700;
-      padding:10px 12px; border-radius:12px; border:1px solid var(--bd);
-      background:#0a1a22; color:var(--fg); transition:.18s;
-    }
-    a.view{ border-color:#12fce3; box-shadow:0 0 12px rgba(0,255,230,.18) }
-    a.down{ border-color:#29a3ff }
-    a.btn:hover{ filter:brightness(1.1) }
-
-    .hint{ display:block; margin-top:10px; opacity:.7; font-size:.85rem }
-
-    /* Footer */
-    .footer{
-      max-width:1200px; margin:14px auto 26px; padding:0 16px;
-      display:flex; gap:10px; align-items:center; opacity:.8; font-size:.9rem;
-    }
-    .link{
-      color:#00eaff; text-decoration:none; border-bottom:1px dotted rgba(0,234,255,.4);
-    }
-    .link:hover{ color:#8af7ff }
-    .badge{
-      margin-left:auto; padding:6px 10px; border:1px solid var(--bd);
-      border-radius:999px; background:#09121a;
-    }
-  </style>
+/* Responsive */
+@media (max-width:640px){
+  :root{ --cover-width:220px }
+}
+</style>
 </head>
 <body>
 
-  <!-- Cabecera/menú global (se inyecta desde /menu.html) -->
-  <div id="menu-wrap" role="navigation"></div>
+<!-- MENÚ GLOBAL -->
+<div id="menu"></div>
 
-  <!-- Contenido principal -->
-  <main>
-    <h1>Libros</h1>
+<header class="header">
+  <h1 style="font-family:Orbitron,Inter;font-weight:700;letter-spacing:.5px;margin:0 0 6px">Biblioteca · Mew Trader ESP</h1>
+  <div style="display:flex;align-items:center;gap:12px">
+    <p class="meta" style="margin:0">Sube archivos a <code>/libros/</code> (PDF/EPUB/MOBI/AZW3). Si pones portada en <code>/libros/covers/</code> <b>o</b> <code>/libros/cover/</code> con el mismo nombre, se mostrará automáticamente.</p>
+    <span class="badge">Estética Mew Trader ESP · Neon</span>
+  </div>
+</header>
 
-    <div class="toolbar">
-      <input id="q" placeholder="Buscar por nombre… (ej. 2025-10, patrón, autor)" />
-      <div id="status">Cargando…</div>
-    </div>
+<main class="grid" id="grid"></main>
 
-    <div id="grid" class="grid"></div>
+<footer class="footer">
+  <a href="/index.html" class="meta">← Volver al inicio</a>
+</footer>
 
-    <small class="hint">
-      Ampliare con el tiempo más libros
-    </small>
-  </main>
+<script>
+/* ===== Config ===== */
+const REPO_OWNER = "mewtraderesp";
+const REPO_NAME  = "mewtraderesp.github.io";
+const BRANCH     = "main";
+const LIB_DIR    = "libros";
+const ALLOWED    = [".pdf",".epub",".mobi",".azw3"];
+const COVERS_DIRS= ["/libros/covers/", "/libros/cover/"];
+const COVER_EXTS = [".png",".jpg",".jpeg",".webp"];
 
-  <footer class="footer">
-    <a class="link" href="/" rel="noopener">⟵ Volver al inicio</a>
-    <div class="badge">El conocimiento es fundamental</div>
-  </footer>
-
-  <!-- Scripts -->
-  <script>
-    /** ===========================
-     *  Cargar menu.html (global)
-     *  =========================== */
-    async function loadMenu(){
-      try{
-        const res = await fetch("/menu.html", { cache:"no-store" });
-        if(!res.ok) throw new Error("HTTP " + res.status);
-
-        const html = await res.text();
-        const wrap = document.getElementById("menu-wrap");
-        wrap.innerHTML = html;
-
-        // Ejecutar <script> internos del menú (si los hay)
-        wrap.querySelectorAll("script").forEach(s => {
-          const sc = document.createElement("script");
-          if(s.src){
-            sc.src = s.src;
-            sc.async = false;
-          }else{
-            sc.textContent = s.textContent;
-          }
-          document.head.appendChild(sc);
-          s.remove();
-        });
-
-        // (Opcional) marcar activo el enlace a Libros si existe
-        const a = wrap.querySelector('a[href="/libros.html"], a[href="/libros/"]');
-        if(a) a.classList.add("active");
-      }catch(e){
-        console.warn("No se pudo cargar menu.html:", e);
-      }
+/* ===== Utilidades ===== */
+const fmtBytes = b => {
+  if (isNaN(b) || b===null) return "";
+  const mb = b/1024/1024;
+  return (mb>=1? mb.toFixed(2)+" MB" : (b/1024).toFixed(0)+" KB");
+};
+const baseName = f => f.replace(/\.(pdf|epub|mobi|azw3)$/i,"");
+const urlExists = async (url) => {
+  try{
+    const r = await fetch(url,{method:"HEAD",cache:"no-store"});
+    return r.ok;
+  }catch(_){return false;}
+};
+/* Busca portada en /libros/covers y /libros/cover con varias extensiones */
+async function resolveCover(name){
+  const safe = encodeURI(name); // respeta espacios/tildes
+  for (const dir of COVERS_DIRS){
+    for (const ext of COVER_EXTS){
+      const u = dir + safe + ext;
+      if (await urlExists(u)) return u;
     }
-    loadMenu();
-  </script>
+  }
+  return null;
+}
 
-  <script>
-    /** =======================================
-     *  Listado automático desde /libros (GitHub API)
-     *  ======================================= */
+/* ===== Carga de menú global (menu.html o menú.html) ===== */
+(async function loadMenu(){
+  const candidates = ["/menu.html","/menú.html"];
+  for(const path of candidates){
+    try{
+      const r = await fetch(path+"?v="+Date.now());
+      if(r.ok){ document.getElementById("menu").innerHTML = await r.text(); return; }
+    }catch(_){}
+  }
+})();
 
-    // Ajusta 'branch' si tu Pages usa otra rama (p.ej., "gh-pages" o "master")
-    const owner = "mewtraderesp";
-    const repo  = "mewtraderesp.github.io";
-    const branch = "main";
-    const path   = "libros";
+/* ===== Carga de libros desde GitHub API ===== */
+async function loadBooks(){
+  const api = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${LIB_DIR}?ref=${BRANCH}`;
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
 
-    const api = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
-    const raw = (p) => `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${p}`;
+  let items = [];
+  try{
+    const res = await fetch(api, {cache:"no-store"});
+    if(!res.ok) throw new Error("GitHub API error: "+res.status);
+    items = await res.json();
+  }catch(e){
+    grid.innerHTML = `<div class="meta">No se pudo leer el directorio /${LIB_DIR}. ${e.message}</div>`;
+    return;
+  }
 
-    const exts = /\.(pdf|epub|mobi|azw3)$/i;
-    const fmtSize = (b) => (b >= 1048576 ? (b/1048576).toFixed(2) + " MB" : (b/1024).toFixed(1) + " KB");
-    const base = (n) => n.replace(exts, "");
-    const dateFromName = (n) => {
-      const m = n.match(/^(\d{4}-\d{2}-\d{2})[_-]/);
-      return m ? new Date(m[1]).getTime() : 0;
-    };
+  // Filtra sólo ficheros de libro (ignora carpetas como cover/covers)
+  const files = items.filter(it => it.type==="file" && ALLOWED.some(ext => it.name.toLowerCase().endsWith(ext)));
 
-    let ALL = [];
+  // Orden opcional: por nombre
+  files.sort((a,b)=>a.name.localeCompare(b.name,"es",{numeric:true,sensitivity:"base"}));
 
-    async function fetchList(){
-      const r = await fetch(api, { headers:{ Accept:"application/vnd.github.v3+json" } });
-      if(!r.ok) throw new Error(await r.text());
-      return r.json();
-    }
+  // Render asíncrono con portadas
+  const cards = await Promise.all(files.map(async f=>{
+    const name = f.name;
+    const title= name;          // nombre visible
+    const size = fmtBytes(f.size);
+    const bookUrl = "/"+LIB_DIR+"/"+encodeURI(name);
+    const cover   = await resolveCover(baseName(name));
+    const coverEl = cover
+      ? `<img class="portada" src="${cover}" alt="${title}" loading="lazy" decoding="async" width="${parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cover-width'))||260}" />`
+      : `<div class="portada-placeholder">Sin portada</div>`;
 
-    function render(list){
-      const q = document.getElementById("q").value.trim().toLowerCase();
-      const grid = document.getElementById("grid");
-      grid.innerHTML = "";
+    return `
+      <article class="libro-card">
+        ${coverEl}
+        <div class="titulo">${title}</div>
+        <div class="meta">${size}</div>
+        <div class="btns">
+          <a class="btn" href="${bookUrl}" target="_blank" rel="noopener">Ver</a>
+          <a class="btn secondary" href="${bookUrl}" download>Descargar</a>
+        </div>
+      </article>`;
+  }));
 
-      const arr = list.filter(f => !q || f.name.toLowerCase().includes(q));
-      if(!arr.length){
-        grid.innerHTML = '<div style="opacity:.7">Sin resultados.</div>';
-        return;
-      }
+  grid.innerHTML = cards.join("");
+}
 
-      for(const f of arr){
-        const b = base(f.name);
-        const cover = raw(`${path}/covers/${b}.png`);
-
-        // Card
-        const card = document.createElement("div");
-        card.className = "card";
-
-        // Thumb (portada o placeholder)
-        const t = document.createElement("div");
-        t.className = "thumb";
-
-        const img = new Image();
-        img.alt = b;
-        img.src = cover;
-        img.onload = () => t.appendChild(img);
-        img.onerror = () => {
-          const ph = document.createElement("div");
-          ph.className = "ph";
-          ph.textContent = "Sin portada";
-          t.appendChild(ph);
-        };
-
-        // Nombre y meta
-        const name = document.createElement("div");
-        name.className = "name";
-        name.textContent = f.name;
-
-        const meta = document.createElement("div");
-        meta.className = "meta";
-        meta.textContent = fmtSize(f.size);
-
-        // Botones
-        const btns = document.createElement("div");
-        btns.className = "btns";
-
-        const view = document.createElement("a");
-        view.className = "btn view";
-        view.href = f.download_url;
-        view.target = "_blank";
-        view.rel = "noopener";
-        view.textContent = "Ver";
-
-        const down = document.createElement("a");
-        down.className = "btn down";
-        down.href = f.download_url;
-        down.download = f.name;
-        down.textContent = "Descargar";
-
-        btns.append(view, down);
-
-        // Ensamblar card
-        card.append(t, name, meta, btns);
-        grid.appendChild(card);
-      }
-    }
-
-    // Carga inicial
-    (async () => {
-      const st = document.getElementById("status");
-      try{
-        const data = await fetchList();
-        const files = data.filter(x => x.type === "file" && exts.test(x.name));
-
-        if(!files.length){
-          st.textContent = "No hay libros todavía.";
-          return;
-        }
-
-        // Orden: fecha en nombre (YYYY-MM-DD_...) desc, si no alfabético
-        files.sort((a, b) =>
-          (dateFromName(b.name) - dateFromName(a.name)) ||
-          a.name.localeCompare(b.name)
-        );
-
-        st.remove();
-        ALL = files;
-        render(ALL);
-      }catch(e){
-        st.textContent = "Error cargando libros: " + e.message;
-      }
-    })();
-
-    // Búsqueda en vivo
-    document.getElementById("q").addEventListener("input", () => render(ALL));
-  </script>
-
+loadBooks();
+</script>
 </body>
 </html>
