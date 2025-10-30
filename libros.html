@@ -19,22 +19,17 @@
   --radius:16px;
 
   /* Tamaño “tipo libro” */
-  --cover-width:260px;         /* ⇦ ancho portada */
-  --cover-aspect:2/3;          /* ⇦ 2:3 vertical tipo libro */
-  --cover-radius:14px;
-
-  /* Alto dinámico del menú (se ajusta por JS) */
-  --menu-h:0px;
+  --cover-width: 260px;      /* ⇦ ajusta ancho */
+  --cover-aspect: 2/3;       /* ⇦ 2:3 formato libro vertical */
+  --cover-radius: 14px;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
-  margin:0;
-  padding-top:var(--menu-h);   /* ⇦ evita solape bajo el menú fijo */
-  background:
-    radial-gradient(1200px 800px at 10% -10%, #0a1630 0%, transparent 60%),
-    radial-gradient(1000px 700px at 110% 20%, #071a29 0%, transparent 55%),
-    var(--bg);
+  margin:0;background:
+  radial-gradient(1200px 800px at 10% -10%, #0a1630 0%, transparent 60%),
+  radial-gradient(1000px 700px at 110% 20%, #071a29 0%, transparent 55%),
+  var(--bg);
   color:var(--text);
   font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
 }
@@ -103,19 +98,22 @@ body{
 }
 .btn:hover{border-color:rgba(0,255,255,.55);box-shadow:0 0 18px rgba(0,255,255,.18) inset, 0 10px 24px rgba(0,0,0,.35)}
 .btn.secondary{border-color:rgba(0,255,168,.35);background:linear-gradient(180deg,rgba(0,255,168,.10),rgba(0,255,168,.06))}
-
-/* Pie */
-.footer{max-width:1200px;margin:8px auto 40px;padding:0 20px;color:#9fb6cc;font-size:12px}
+.footer{
+  max-width:1200px;margin:8px auto 40px;padding:0 20px;color:#9fb6cc;font-size:12px
+}
 .badge{display:inline-block;margin-left:auto;background:rgba(0,0,0,.35);border:1px solid rgba(0,255,255,.25);padding:10px 14px;border-radius:999px}
 
 /* Responsive */
-@media (max-width:640px){ :root{ --cover-width:220px } }
+@media (max-width:640px){
+  :root{ --cover-width:220px }
+}
 </style>
 </head>
 <body>
 
 <!-- MENÚ GLOBAL -->
 <div id="menu"></div>
+
 
 <main class="grid" id="grid"></main>
 
@@ -141,12 +139,14 @@ const fmtBytes = b => {
 };
 const baseName = f => f.replace(/\.(pdf|epub|mobi|azw3)$/i,"");
 const urlExists = async (url) => {
-  try{ const r = await fetch(url,{method:"HEAD",cache:"no-store"}); return r.ok; }
-  catch(_){ return false; }
+  try{
+    const r = await fetch(url,{method:"HEAD",cache:"no-store"});
+    return r.ok;
+  }catch(_){return false;}
 };
 /* Busca portada en /libros/covers y /libros/cover con varias extensiones */
 async function resolveCover(name){
-  const safe = encodeURI(name);
+  const safe = encodeURI(name); // respeta espacios/tildes
   for (const dir of COVERS_DIRS){
     for (const ext of COVER_EXTS){
       const u = dir + safe + ext;
@@ -156,41 +156,16 @@ async function resolveCover(name){
   return null;
 }
 
-/* ===== Ajuste automático de espacio para el MENÚ (anti-solape) ===== */
-function ajustarEspacioMenu(){
-  const m = document.getElementById('menu');
-  if(!m) return;
-  // Altura real (aunque el nav interno sea fixed)
-  let h = m.getBoundingClientRect().height || 0;
-  if(h < 50 && m.firstElementChild){
-    const c = m.firstElementChild;
-    h = c.getBoundingClientRect().height || c.offsetHeight || 0;
-  }
-  document.documentElement.style.setProperty('--menu-h', (h + 8) + 'px'); // +8px respiro
-}
-
 /* ===== Carga de menú global (menu.html o menú.html) ===== */
 (async function loadMenu(){
   const candidates = ["/menu.html","/menú.html"];
   for(const path of candidates){
     try{
       const r = await fetch(path+"?v="+Date.now());
-      if(r.ok){
-        document.getElementById("menu").innerHTML = await r.text();
-        // Ajusta padding una vez insertado y tras pintar
-        requestAnimationFrame(()=>{ ajustarEspacioMenu(); requestAnimationFrame(ajustarEspacioMenu); });
-        break;
-      }
+      if(r.ok){ document.getElementById("menu").innerHTML = await r.text(); return; }
     }catch(_){}
   }
-  // Observa cambios de tamaño (modo responsive)
-  const obsTarget = document.getElementById('menu');
-  if (obsTarget && 'ResizeObserver' in window){
-    new ResizeObserver(ajustarEspacioMenu).observe(obsTarget);
-  }
 })();
-window.addEventListener('load', ajustarEspacioMenu);
-window.addEventListener('resize', ajustarEspacioMenu);
 
 /* ===== Carga de libros desde GitHub API ===== */
 async function loadBooks(){
@@ -208,16 +183,16 @@ async function loadBooks(){
     return;
   }
 
-  // Sólo ficheros de libro (ignora carpetas como cover/covers)
+  // Filtra sólo ficheros de libro (ignora carpetas como cover/covers)
   const files = items.filter(it => it.type==="file" && ALLOWED.some(ext => it.name.toLowerCase().endsWith(ext)));
 
-  // Orden por nombre
+  // Orden opcional: por nombre
   files.sort((a,b)=>a.name.localeCompare(b.name,"es",{numeric:true,sensitivity:"base"}));
 
   // Render asíncrono con portadas
   const cards = await Promise.all(files.map(async f=>{
     const name = f.name;
-    const title= name;
+    const title= name;          // nombre visible
     const size = fmtBytes(f.size);
     const bookUrl = "/"+LIB_DIR+"/"+encodeURI(name);
     const cover   = await resolveCover(baseName(name));
