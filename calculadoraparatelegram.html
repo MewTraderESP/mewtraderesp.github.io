@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="robots" content="noindex,nofollow">
+<title>Mew Trader_ESP · Calculadora de Precio Promedio & Stop Loss</title>
+
+<!-- ===== Tipografías / base ===== -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+
+:root {
+  --bg1:#05010a;--bg2:#0d0220;--card:#121822;
+  --fg:#e8eef7;--muted:#7b8aa0;--accent:#00ffff;
+  --accent2:#a020f0;--danger:#ff5a7d;
+}
+
+/* ===== Base del sitio (conservada) ===== */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Orbitron',sans-serif;}
+body{
+  background:radial-gradient(circle at top left,var(--bg1),var(--bg2));
+  color:var(--fg);
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:0 5vw 24px 5vw;
+  text-shadow:0 0 5px rgba(255,255,255,0.1);
+  overflow-x:hidden;
+}
+.app{width:100%;max-width:980px;}
+.title{
+  text-align:center;font-size:clamp(20px,2.6vw,28px);font-weight:700;
+  margin:0 0 10px;color:var(--accent);text-shadow:0 0 8px var(--accent2);
+}
+.subtitle{
+  text-align:center;color:var(--muted);margin:0 0 22px;font-size:14px;
+}
+
+/* Grid y tarjetas del shell original */
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;}
+.card{
+  grid-column:span 12;background:rgba(20,15,30,0.95);
+  border:1px solid rgba(0,255,255,0.15);border-radius:16px;padding:20px;
+  box-shadow:0 0 25px rgba(0,255,255,0.05);backdrop-filter:blur(5px);
+}
+
+@media(min-width:860px){.card.half{grid-column:span 6;}}
+
+/* Botones/animación copy (conservado) */
+button{
+  cursor:pointer;border:1px solid rgba(0,255,255,0.3);
+  background:linear-gradient(90deg,var(--accent2),var(--accent));
+  color:#000;border-radius:12px;padding:10px 14px;font-weight:700;letter-spacing:.3px;
+  text-transform:uppercase;transition:all .3s ease;box-shadow:0 0 10px rgba(0,255,255,0.2);
+}
+button:hover{background:var(--accent2);color:#fff;box-shadow:0 0 20px var(--accent2);}
+@keyframes glowCopy {
+  0% { box-shadow:0 0 10px var(--accent2), inset 0 0 10px var(--accent2); }
+  50% { box-shadow:0 0 25px var(--accent), inset 0 0 20px var(--accent); }
+  100% { box-shadow:0 0 10px rgba(0,255,255,0.2); }
+}
+button.glow { animation: glowCopy 1.5s ease-out; }
+
+/* Frase del día (conservado) */
+#frase-dia{
+  font-size:1.4rem;color:#ff59f9;
+  text-shadow:0 0 12px rgba(255,89,249,0.9),0 0 24px rgba(255,89,249,0.6);
+  margin-bottom:12px;display:block;max-width:90%;margin-inline:auto;text-align:center;
+  animation:pulseNeon 2.5s infinite ease-in-out;
+}
+@keyframes pulseNeon{
+  0%,100%{text-shadow:0 0 8px rgba(255,89,249,0.6),0 0 18px rgba(255,89,249,0.4);}
+  50%{text-shadow:0 0 20px rgba(255,89,249,1),0 0 40px rgba(255,89,249,0.8);}
+}
+
+.muted{color:var(--muted);}
+.mono{font-family:ui-monospace,monospace;}
+.main-header{text-align:center;margin:30px 0 40px;}
+.main-header img{
+  display:block;margin:10px auto;border-radius:20px;max-width:200px;
+  box-shadow:0 0 15px rgba(0,255,255,0.3);
+}
+.main-header a{color:var(--accent2);text-decoration:none;font-weight:600;transition:.3s;}
+.main-header a:hover{color:var(--accent);text-shadow:0 0 10px var(--accent);}
+
+/* ===== Móvil (conservado) ===== */
+@media (max-width:600px){
+  body{padding:0 3vw 24px 3vw;}
+  .grid{gap:10px;}
+  .card{padding:16px;}
+  .footer{flex-direction:column;align-items:stretch;}
+  button{width:100%;text-align:center;font-size:13px;padding:12px 0;}
+  label{font-size:11px;}
+  #frase-dia{font-size:1.1rem;margin-bottom:8px;}
+}
+
+/* ====== Estilos de la nueva calculadora v2, aislados en .calcv2 ====== */
+.calcv2{font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;}
+.calcv2 .brand h1{font:800 20px/1 Orbitron,Inter,sans-serif;letter-spacing:.6px;margin:0}
+.calcv2 section.card{background:linear-gradient(180deg,#0e1525,#0b1220);border:1px solid rgba(255,255,255,.06);
+  border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.35);padding:18px;margin-bottom:14px}
+.calcv2 .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+.calcv2 .col-6{grid-column:span 6}.calcv2 .col-12{grid-column:span 12}
+.calcv2 .col-8{grid-column:span 8}.calcv2 .col-4{grid-column:span 4}.calcv2 .col-3{grid-column:span 3}
+.calcv2 label{font-size:12px;color:#86a2bd;display:block;margin:0 0 6px 2px}
+.calcv2 input,.calcv2 select,.calcv2 button{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.08);
+  background:#0a1120;color:#cfe7ff;outline:none}
+.calcv2 input:focus,.calcv2 select:focus{border-color:#00e3ff}
+.calcv2 small.hint{color:#86a2bd;font-size:11px}
+.calcv2 .row{display:flex;gap:10px;align-items:center}
+.calcv2 .btn{cursor:pointer;user-select:none;transition:transform .06s ease,box-shadow .2s}
+.calcv2 .btn.primary{background:linear-gradient(135deg,#00e3ff,#00ffa8);color:#06111a;border:0;
+  box-shadow:0 6px 22px rgba(0,227,255,.25), inset 0 0 12px rgba(0,255,168,.25)}
+.calcv2 .btn.primary:active{transform:scale(.99)}
+.calcv2 .table{width:100%;border-collapse:collapse;margin-top:8px}
+.calcv2 .table th,.calcv2 .table td{border-bottom:1px dashed rgba(255,255,255,.08);padding:10px 8px;text-align:right}
+.calcv2 .table th:first-child,.calcv2 .table td:first-child{text-align:left}
+
+/* Ocultar badge distribución (nos la quedamos para lógica) */
+.calcv2 .badge{display:none}
+
+/* Ocultar columnas notional/cantidad en UI (lógica intacta) */
+#entriesTable th:nth-child(4), #entriesTable td:nth-child(4),
+#entriesTable th:nth-child(5), #entriesTable td:nth-child(5){ display:none; }
+
+/* Separador bajo KPIs */
+.calcv2 hr.sep{ display:none; }
+
+.calcv2 .kpi{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}
+.calcv2 .kpi .box{background:#0a1322;border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px}
+.calcv2 .kpi .box h3{margin:0 0 2px;font:700 13px/1.1 Inter;color:#86a2bd}
+.calcv2 .kpi .box p{margin:0;font:800 18px/1.1 Orbitron}
+@media (max-width:880px){
+  .calcv2 .col-6,.calcv2 .col-4{grid-column:span 12}
+  .calcv2 .col-3{grid-column:span 6}
+  .calcv2 .kpi{grid-template-columns:repeat(1,1fr)}
+}
+</style>
+</head>
+
+<body>
+<!-- 🔹 Menú dinámico -->
+<div id="menu-container"></div>
+<script>
+fetch("menu.html")
+  .then(r => r.text())
+  .then(h => {
+    const container = document.getElementById("menu-container");
+    container.innerHTML = h;
+    const script = document.createElement("script");
+    script.textContent = `
+      const menuToggle = document.getElementById("menuToggle");
+      const mainNav = document.getElementById("mainNav");
+      menuToggle?.addEventListener("click", () => {
+        mainNav?.classList.toggle("open");
+        menuToggle?.classList.toggle("active");
+      });
+    `;
+    container.appendChild(script);
+    const menu = container.querySelector("header");
+    if (menu) document.body.style.marginTop = (menu.offsetHeight || 90) + "px";
+  });
+</script>
+
+<!-- 🔹 Bloque QR + frase -->
+<div class="main-header">
+  <span id="frase-dia">Cargando sabiduría del mercado...</span>
+  <img src="qr_telegram.png" alt="QR Telegram Mew Trader" width="200" height="200">
+  <p><a href="https://t.me/+7AQfPAfGrO44ZjQ0" target="_blank">https://t.me/MewTraderESP</a></p>
+</div>
+
+<!-- 🔹 App wrapper -->
+<div class="app">
+  <h2 class="title">Calculadora de Precio Promedio & Stop Loss</h2>
+  <p class="subtitle">Entradas escalonadas <strong>15% / 30% / 55%</strong>. Calcula precio medio, riesgo y liquidación aprox. según capital, apalancamiento y riesgo máximo.</p>
+
+  <div class="calcv2">
+    <section class="card">
+      <div class="grid">
+        <div class="col-6">
+          <label>Capital de la cuenta (USD)</label>
+          <input id="capital" type="number" inputmode="decimal" step="0.01" value="4000"/>
+        </div>
+        <div class="col-3">
+          <label>Riesgo por operación (%)</label>
+          <input id="riskPct" type="number" inputmode="decimal" step="0.1" value="1.5"/>
+        </div>
+        <div class="col-3">
+          <label>Dirección</label>
+          <select id="side">
+            <option value="long">LONG</option>
+            <option value="short">SHORT</option>
+          </select>
+        </div>
+
+        <div class="col-3">
+          <label>Apalancamiento (x)</label>
+          <input id="leverage" type="number" inputmode="decimal" step="0.1" value="5"/>
+          <small class="hint">Afecta a liquidación (aprox.).</small>
+        </div>
+
+        <div class="col-3">
+          <label>Nº de tramos</label>
+          <select id="tranches">
+            <option>2</option>
+            <option selected>3</option>
+            <option>4</option>
+            <option>5</option>
+          </select>
+        </div>
+        <div class="col-6">
+          <label>Preset de distribución</label>
+          <select id="preset">
+            <option value="equal">Equitativo (50/50, 33/33/33…)</option>
+            <option value="153055" selected>Progresivo 15/30/55</option>
+            <option value="custom">Personalizado (sliders)</option>
+          </select>
+        </div>
+        <div class="col-3">
+          <label>Stop Loss global (precio)</label>
+          <input id="stopPrice" type="number" inputmode="decimal" step="0.0001" value="60000" placeholder="Ej. 110.40"/>
+        </div>
+      </div>
+
+      <div id="customWeights" class="grid" style="margin-top:10px;display:none"></div>
+
+      <div class="row" style="margin-top:12px;justify-content:flex-end">
+        <button class="btn" id="btnPreset" style="display:none">Aplicar preset</button>
+        <button class="btn primary" id="btnCalc">Calcular</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <h2 style="margin:4px 0">Entradas</h2>
+        <span class="badge" id="weightsBadge">Distribución</span>
+      </div>
+      <table class="table" id="entriesTable">
+        <thead>
+          <tr>
+            <th>Tramo</th>
+            <th style="min-width:160px">Precio de entrada</th>
+            <th>% peso</th>
+            <th>$ notional</th>
+            <th>Cantidad</th>
+            <th>Riesgo $</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+          <tr>
+            <td>Total</td>
+            <td></td>
+            <td id="wtSum">0%</td>
+            <td id="notionalSum">$0.00</td>
+            <td id="qtySum">0</td>
+            <td id="riskSum">$0.00</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div class="kpi">
+        <div class="box"><h3>Riesgo objetivo</h3><p id="kpiRisk">$0.00</p></div>
+        <div class="box"><h3>Precio medio</h3><p id="kpiAvg">—</p></div>
+        <div class="box"><h3>Precio de liquidación (aprox.)</h3><p id="kpiLiq">—</p><small class="hint">Sin comisiones/funding</small></div>
+      </div>
+
+      <hr class="sep"/>
+
+      <!-- (se eliminaron los campos TP) -->
+
+      <div class="row" style="margin-top:12px;justify-content:flex-end">
+        <button class="btn" id="btnCopy">Copiar resultados</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ===== Script de la calculadora v2 ===== -->
+<script>
+(function(){
+  const $  = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+  const fmtUSD = n => isFinite(n)? n.toLocaleString('es-ES',{style:'currency',currency:'USD',maximumFractionDigits:2}) : '—';
+  const fmtPct = n => isFinite(n)? (n.toFixed(2)+'%') : '—';
+  const clamp  = (v,min,max)=> Math.min(max,Math.max(min,v));
+  const MMR_DEFAULT = 0.005;
+
+  const capital   = $('#capital');
+  const riskPct   = $('#riskPct');
+  const sideSel   = $('#side');
+  const trSel     = $('#tranches');
+  const presetSel = $('#preset');
+  const stopPrice = $('#stopPrice');
+  const btnPreset = $('#btnPreset');
+  const btnCalc   = $('#btnCalc');
+  const entriesTBody = $('#entriesTable tbody');
+  const leverage  = $('#leverage');
+  const customBox = $('#customWeights');
+
+  const kpiRisk = $('#kpiRisk');
+  const kpiAvg  = $('#kpiAvg');
+  const kpiLiq  = $('#kpiLiq');
+
+  const state = { weights: [], rows: [], snapshot:null };
+
+  function updateWeightsBadge(){
+    const sum = state.weights.reduce((a,b)=>a+b,0);
+    const b = document.getElementById('weightsBadge');
+    if(b) b.textContent = `Distribución: ${sum.toFixed(2)}%`;
+  }
+
+  function buildRows(){
+    entriesTBody.innerHTML = '';
+    state.rows = [];
+    const n = parseInt(trSel.value,10);
+    for(let i=0;i<n;i++){
+      const tr = document.createElement('tr');
+      const td0 = document.createElement('td'); td0.textContent = `Tramo ${i+1}`;
+      const td1 = document.createElement('td'); td1.innerHTML = `<input type="number" step="0.0001" inputmode="decimal" class="price" placeholder="Precio">`;
+      const td2 = document.createElement('td'); td2.innerHTML = `<input type="number" step="0.1" inputmode="decimal" class="weight" value="${(state.weights[i]||0).toFixed(2)}">`;
+      const td3 = document.createElement('td'); td3.className='notional'; td3.textContent='—';
+      const td4 = document.createElement('td'); td4.className='qty'; td4.textContent='—';
+      const td5 = document.createElement('td'); td5.className='risk'; td5.textContent='—';
+      tr.append(td0,td1,td2,td3,td4,td5);
+      entriesTBody.appendChild(tr);
+      state.rows.push({price: td1.querySelector('input'), weight: td2.querySelector('input'), notional: td3, qty: td4, risk: td5});
+    }
+    updateWeightsBadge();
+  }
+
+  function buildCustomSliders(){
+    const n = parseInt(trSel.value,10);
+    customBox.style.display = (presetSel.value==='custom') ? 'grid' : 'none';
+    if(presetSel.value!=='custom') return;
+
+    customBox.innerHTML='';
+    for(let i=0;i<n;i++){
+      const wrap=document.createElement('div'); wrap.className='col-3';
+      wrap.innerHTML = `<label>Tramo ${i+1} (%)</label>
+        <input type="range" min="0" max="100" step="1"  value="\${Math.round(state.weights[i]||0)}" data-k="\${i}">
+        <input type="number" min="0" max="100" step="0.1" value="\${(state.weights[i]||0).toFixed(1)}" data-k="\${i}" class="wNum">`;
+      customBox.appendChild(wrap);
+    }
+
+    const sliders = $$('#customWeights input[type=range]');
+    const nums    = $$('#customWeights .wNum');
+
+    const normalize = ()=>{
+      let w = nums.map(n=> parseFloat(n.value||'0'));
+      const sum = w.reduce((a,b)=>a+b,0);
+      if(sum<=0) w = w.map(()=>100/w.length); else w = w.map(x=> x/sum*100);
+      state.weights = w;
+      nums.forEach((n,i)=> n.value = state.weights[i].toFixed(1));
+      sliders.forEach((s,i)=> s.value = Math.round(state.weights[i]));
+      state.rows.forEach((r,i)=>{ if(r?.weight) r.weight.value = state.weights[i].toFixed(2); });
+      updateWeightsBadge();
+    };
+
+    sliders.forEach(sl=>{
+      sl.oninput = ()=>{ const k=sl.dataset.k; nums.find(n=>n.dataset.k===k).value = sl.value; normalize(); };
+    });
+    nums.forEach(num=>{
+      num.oninput = ()=>{ const v=clamp(parseFloat(num.value||'0'),0,100); num.value=v; sliders.find(s=>s.dataset.k===num.dataset.k).value=v; normalize(); };
+    });
+  }
+
+  function setPreset(){
+    const n = parseInt(trSel.value,10);
+    let w = new Array(n).fill(0);
+    const mode = presetSel.value;
+
+    if(mode==='equal'){
+      w = w.map(()=>100/n);
+    }else if(mode==='153055'){
+      if(n===2){ w=[40,60]; }
+      else if(n===3){ w=[15,30,55]; }
+      else if(n===4){ w=[10,20,30,40]; }
+      else if(n===5){ w=[8,17,25,25,25]; }
+    }else if(mode==='custom'){
+      if(state.weights.length!==n || state.weights.reduce((a,b)=>a+b,0)<=0) w = w.map(()=>100/n);
+      else w = state.weights.slice(0,n);
+    }
+    const sum = w.reduce((a,b)=>a+b,0);
+    state.weights = w.map(x=> x/sum*100);
+    buildRows();
+    buildCustomSliders();
+  }
+
+  function calc(){
+    const cap  = parseFloat(capital.value||'0');
+    const risk = cap * (parseFloat(riskPct.value||'0')/100);
+    const side = sideSel.value;
+    the_lev = parseFloat(leverage.value||'1');
+    const lev  = Math.max(1, the_lev);
+    const mmr  = 0.005;
+
+    const n = state.rows.length;
+    let w = state.rows.map(r=> parseFloat(r.weight.value||'0'));
+    let sumW = w.reduce((a,b)=>a+b,0);
+    if(sumW<=0){ w = w.map(()=>100/n); sumW=100; }
+    w = w.map(x=> x/sumW);
+
+    const prices = state.rows.map(r=> parseFloat(r.price.value||'NaN'));
+    if(prices.some(x=> !isFinite(x))){ alert('Introduce todos los precios de entrada.'); return; }
+    const sl = parseFloat(stopPrice.value||'NaN');
+    if(!isFinite(sl)){ alert('Introduce un precio de Stop Loss global.'); return; }
+
+    let prelimQty = prices.map((p,i)=> (cap * w[i]) / p);
+    const riskPer = prices.map((p,i)=> Math.abs(prelimQty[i] * (p - sl)) );
+    const prelimRisk = riskPer.reduce((a,b)=>a+b,0);
+    if(prelimRisk<=0){ alert('Verifica precios y SL.'); return; }
+    const k = risk / prelimRisk;
+
+    const qty = prelimQty.map(q=> q * k);
+    const notionals = qty.map((q,i)=> q * prices[i]);
+    const riskParts = prices.map((p,i)=> Math.abs(qty[i] * (p - sl)));
+
+    const qtyTot = qty.reduce((a,b)=>a+b,0);
+    const notTot = notionals.reduce((a,b)=>a+b,0);
+    const avg = qtyTot>0? (qty.reduce((s,q,i)=> s + q*prices[i],0) / qtyTot) : NaN;
+    const riskTot = riskParts.reduce((a,b)=>a+b,0);
+
+    let liq = NaN;
+    if(isFinite(avg)){
+      liq = (side==='long') ? avg*(1 - 1/lev + mmr) : avg*(1 + 1/lev - mmr);
+    }
+
+    state.rows.forEach((r,i)=>{
+      r.weight.value = (w[i]*100).toFixed(2);
+      r.notional.textContent = fmtUSD(notionals[i]);
+      r.qty.textContent = isFinite(qty[i])? qty[i].toFixed(6) : '—';
+      r.risk.textContent = fmtUSD(riskParts[i]);
+    });
+    document.getElementById('wtSum').textContent = fmtPct(w.reduce((a,b)=>a+b,0)*100);
+    document.getElementById('notionalSum').textContent = fmtUSD(notTot);
+    document.getElementById('qtySum').textContent = isFinite(qtyTot)? qtyTot.toFixed(6) : '—';
+    document.getElementById('riskSum').textContent = fmtUSD(riskTot);
+
+    kpiRisk.textContent = fmtUSD(risk);
+    kpiAvg.textContent  = isFinite(avg)? avg.toFixed(6) : '—';
+    kpiLiq.textContent  = isFinite(liq)? liq.toFixed(6) : '—';
+
+    state.snapshot = {
+      cap, riskPct: parseFloat(riskPct.value||'0'), side, n,
+      weights: w.map(x=> x*100), prices, sl,
+      qty, notionals, riskParts, qtyTot, notTot, avg, risk, riskTot,
+      lev, mmr, liq
+    };
+  }
+
+  // 📋 Copia formateada (Telegram-ready)
+  function copyTelegram(){
+    if(!state.snapshot){ alert('Calcula primero.'); return; }
+    const s = state.snapshot;
+
+    // detalle de entradas en texto
+    const detalle = Array.from({length: s.n}).map((_,i)=>{
+      return `• Tramo ${i+1}: precio ${s.prices[i]} · peso ${s.weights[i].toFixed(2)}% · qty ${s.qty[i].toFixed(6)} · riesgo ${fmtUSD(s.riskParts[i])}`;
+    }).join('\n');
+
+    const slLong  = (s.side==='long')  ? String(s.sl) : '—';
+    const slShort = (s.side==='short') ? String(s.sl) : '—';
+
+    const texto =
+`📊 *Resultados de la Calculadora Mew Trader_ESP*
+
+💠 *Precio Promedio:* ${isFinite(s.avg)? s.avg.toFixed(6) : '—'}
+
+${detalle}
+
+🛡️ *Stop Loss (LONG):* ${slLong}
+⚔️ *Stop Loss (SHORT):* ${slShort}
+
+🎯 *Riesgo máximo:* ${s.riskPct.toFixed(2)}%
+💰 *Riesgo en USD:* ${fmtUSD(s.risk)}
+🔧 *Apalancamiento:* x${s.lev.toFixed(2)} · *Dirección:* ${s.side.toUpperCase()}
+`;
+
+    navigator.clipboard.writeText(texto).then(()=>{
+      const btn = document.getElementById('btnCopy');
+      btn.classList.add('glow');
+      setTimeout(()=>btn.classList.remove('glow'),1500);
+      alert('✅ Resultados copiados con formato Telegram-ready.');
+    }).catch(()=>{
+      alert('⚠️ No se pudo copiar los resultados.');
+    });
+  }
+
+  document.getElementById('btnCopy').addEventListener('click', copyTelegram);
+  if(btnPreset) btnPreset.addEventListener('click',()=>{ setPreset(); buildCustomSliders(); });
+  trSel.addEventListener('change',()=>{ setPreset(); buildCustomSliders(); });
+  presetSel.addEventListener('change',()=>{ setPreset(); buildCustomSliders(); });
+  btnCalc.addEventListener('click',calc);
+
+  // init
+  state.weights = [15,30,55];
+  setPreset();
+})();
+</script>
+
+<!-- ===== Frase del día ===== -->
+<script>
+fetch("frases.json")
+  .then(r=>r.json())
+  .then(d=>{
+    const frases=d.frases||[];
+    const frase=frases[Math.floor(Math.random()*frases.length)]||"Piensa fuera de la caja.";
+    document.getElementById("frase-dia").textContent=frase;
+  })
+  .catch(()=>document.getElementById("frase-dia").textContent="Piensa fuera de la caja.");
+</script>
+</body>
+</html>
