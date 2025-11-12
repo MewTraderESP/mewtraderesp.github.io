@@ -182,7 +182,8 @@ fetch("menu.html")
           <input id="capital" type="number" inputmode="decimal" step="0.01" value="4000"/>
         </div>
         <div class="col-3">
-          <label>Riesgo por operación (%)</label>
+          <!-- Cambiado solo el texto -->
+          <label>Capital a usar (%)</label>
           <input id="riskPct" type="number" inputmode="decimal" step="0.1" value="1.5"/>
         </div>
         <div class="col-3">
@@ -260,7 +261,12 @@ fetch("menu.html")
       </table>
 
       <div class="kpi">
-        <div class="box"><h3>Riesgo objetivo</h3><p id="kpiRisk">$0.00</p></div>
+        <div class="box">
+          <h3>Riesgo objetivo</h3>
+          <p id="kpiRisk">$0.00</p>
+          <!-- NUEVO: porcentajes de riesgo -->
+          <small class="hint" id="kpiRiskPct">—% cuenta (—% de la operación)</small>
+        </div>
         <div class="box"><h3>Precio medio</h3><p id="kpiAvg">—</p></div>
         <div class="box"><h3>Precio de liquidación (aprox.)</h3><p id="kpiLiq">—</p><small class="hint">Sin comisiones/funding</small></div>
       </div>
@@ -287,7 +293,7 @@ fetch("menu.html")
   const MMR_DEFAULT = 0.005;
 
   const capital   = $('#capital');
-  const riskPct   = $('#riskPct');
+  const riskPct   = $('#riskPct');   // % de capital a usar
   const sideSel   = $('#side');
   const trSel     = $('#tranches');
   const presetSel = $('#preset');
@@ -298,7 +304,8 @@ fetch("menu.html")
   const leverage  = $('#leverage');
   const customBox = $('#customWeights');
 
-  const kpiRisk = $('#kpiRisk');
+  const kpiRisk = $('#kpiRisk');     // PÉRDIDA al SL global
+  const kpiRiskPct = $('#kpiRiskPct'); // NUEVO %s
   const kpiAvg  = $('#kpiAvg');
   const kpiLiq  = $('#kpiLiq');
 
@@ -389,10 +396,9 @@ fetch("menu.html")
 
   function calc(){
     const cap  = parseFloat(capital.value||'0');
-    const risk = cap * (parseFloat(riskPct.value||'0')/100);
+    const sizePct = parseFloat(riskPct.value||'0')/100; // % capital a usar (margen)
     const side = sideSel.value;
-    the_lev = parseFloat(leverage.value||'1');
-    const lev  = Math.max(1, the_lev);
+    const lev  = Math.max(1, parseFloat(leverage.value||'1'));
     const mmr  = 0.005;
 
     const n = state.rows.length;
@@ -406,46 +412,77 @@ fetch("menu.html")
     const sl = parseFloat(stopPrice.value||'NaN');
     if(!isFinite(sl)){ alert('Introduce un precio de Stop Loss global.'); return; }
 
-    let prelimQty = prices.map((p,i)=> (cap * w[i]) / p);
-    const riskPer = prices.map((p,i)=> Math.abs(prelimQty[i] * (p - sl)) );
-    const prelimRisk = riskPer.reduce((a,b)=>a+b,0);
-    if(prelimRisk<=0){ alert('Verifica precios y SL.'); return; }
-    const k = risk / prelimRisk;
+    // ✅ Capital a usar y exposición (no dependen del SL)
+    const capitalUsed      = cap * sizePct;     // margen
+    const positionNotional = capitalUsed * lev; // exposición
 
-    const qty = prelimQty.map(q=> q * k);
+    // Cantidades por tramo y notional
+    const qty = prices.map((p,i)=> (positionNotional * w[i]) / p);
     const notionals = qty.map((q,i)=> q * prices[i]);
-    const riskParts = prices.map((p,i)=> Math.abs(qty[i] * (p - sl)));
 
     const qtyTot = qty.reduce((a,b)=>a+b,0);
     const notTot = notionals.reduce((a,b)=>a+b,0);
     const avg = qtyTot>0? (qty.reduce((s,q,i)=> s + q*prices[i],0) / qtyTot) : NaN;
-    const riskTot = riskParts.reduce((a,b)=>a+b,0);
 
+    // Liquidación aprox.
     let liq = NaN;
     if(isFinite(avg)){
       liq = (side==='long') ? avg*(1 - 1/lev + mmr) : avg*(1 + 1/lev - mmr);
     }
 
+    // 🔻 Pérdida al tocar SL (depende de precios/SL)
+    const slLossParts = prices.map((p,i)=> Math.abs(qty[i] * (p - sl)));
+    const slLossTot   = slLossParts.reduce((a,b)=>a+b,0);
+
+    // 🔸 Asignación fija de "Riesgo $" por tramo = peso% * capitalUsado
+    const riskAllocParts = w.map(wi => wi * capitalUsed);
+    const riskAllocTot   = riskAllocParts.reduce((a,b)=>a+b,0); // == capitalUsed
+
+    // ⛔ Validación SL vs Liquidación
+    if (isFinite(liq)) {
+      const invalid = (side==='long' && sl < liq) || (side==='short' && sl > liq);
+      if (invalid) {
+        alert('❌ El precio de Stop Loss está por debajo del precio de liquidación. Ajusta el SL o reduce el apalancamiento para evitar ser liquidado antes de ejecutar el SL.');
+      }
+    }
+
+    // Render tabla
     state.rows.forEach((r,i)=>{
       r.weight.value = (w[i]*100).toFixed(2);
       r.notional.textContent = fmtUSD(notionals[i]);
       r.qty.textContent = isFinite(qty[i])? qty[i].toFixed(6) : '—';
-      r.risk.textContent = fmtUSD(riskParts[i]);
+      r.risk.textContent = fmtUSD(riskAllocParts[i]);      // ← fijo por % capital usado
     });
-    document.getElementById('wtSum').textContent = fmtPct(w.reduce((a,b)=>a+b,0)*100);
+    document.getElementById('wtSum').textContent   = fmtPct(w.reduce((a,b)=>a+b,0)*100);
     document.getElementById('notionalSum').textContent = fmtUSD(notTot);
-    document.getElementById('qtySum').textContent = isFinite(qtyTot)? qtyTot.toFixed(6) : '—';
-    document.getElementById('riskSum').textContent = fmtUSD(riskTot);
+    document.getElementById('qtySum').textContent  = isFinite(qtyTot)? qtyTot.toFixed(6) : '—';
+    document.getElementById('riskSum').textContent = fmtUSD(riskAllocTot);
 
-    kpiRisk.textContent = fmtUSD(risk);
+    // KPI "Riesgo objetivo" = PÉRDIDA estimada al tocar SL
+    kpiRisk.textContent = fmtUSD(slLossTot);
+
+    // NUEVO: % sobre cuenta y % sobre operación (margen)
+    const riskPctAccount   = cap > 0 ? (slLossTot / cap) * 100 : 0;
+    const riskPctOperation = capitalUsed > 0 ? (slLossTot / capitalUsed) * 100 : 0;
+    if (kpiRiskPct) {
+      kpiRiskPct.textContent = `${riskPctAccount.toFixed(2)}% cuenta (${riskPctOperation.toFixed(2)}% de la operación)`;
+    }
+
     kpiAvg.textContent  = isFinite(avg)? avg.toFixed(6) : '—';
     kpiLiq.textContent  = isFinite(liq)? liq.toFixed(6) : '—';
 
+    // Snapshot para copiar
     state.snapshot = {
-      cap, riskPct: parseFloat(riskPct.value||'0'), side, n,
+      cap,
+      riskPct: parseFloat(riskPct.value||'0'),
+      side, n,
       weights: w.map(x=> x*100), prices, sl,
-      qty, notionals, riskParts, qtyTot, notTot, avg, risk, riskTot,
-      lev, mmr, liq
+      qty, notionals,
+      riskAllocParts, riskAllocTot,
+      slLossParts, slLossTot,
+      qtyTot, notTot, avg, lev, mmr, liq,
+      risk: slLossTot,
+      riskPctAccount, riskPctOperation, capitalUsed
     };
   }
 
@@ -454,9 +491,8 @@ fetch("menu.html")
     if(!state.snapshot){ alert('Calcula primero.'); return; }
     const s = state.snapshot;
 
-    // detalle de entradas en texto
     const detalle = Array.from({length: s.n}).map((_,i)=>{
-      return `• Tramo ${i+1}: precio ${s.prices[i]} · peso ${s.weights[i].toFixed(2)}% · qty ${s.qty[i].toFixed(6)} · riesgo ${fmtUSD(s.riskParts[i])}`;
+      return `• Tramo ${i+1}: precio ${s.prices[i]} · peso ${s.weights[i].toFixed(2)}% · qty ${s.qty[i].toFixed(6)} · asignación ${fmtUSD(s.riskAllocParts[i])} · pérdida al SL ${fmtUSD(s.slLossParts[i])}`;
     }).join('\n');
 
     const slLong  = (s.side==='long')  ? String(s.sl) : '—';
@@ -472,8 +508,8 @@ ${detalle}
 🛡️ *Stop Loss (LONG):* ${slLong}
 ⚔️ *Stop Loss (SHORT):* ${slShort}
 
-🎯 *Riesgo máximo:* ${s.riskPct.toFixed(2)}%
-💰 *Riesgo en USD:* ${fmtUSD(s.risk)}
+🎯 *Capital a usar:* ${s.riskPct.toFixed(2)}%  (total ${fmtUSD(s.capitalUsed || s.riskAllocTot)})
+💰 *Pérdida al tocar SL:* ${fmtUSD(s.risk)} — ${ (s.riskPctAccount||0).toFixed(2)}% cuenta (${ (s.riskPctOperation||0).toFixed(2)}% de la operación)
 🔧 *Apalancamiento:* x${s.lev.toFixed(2)} · *Dirección:* ${s.side.toUpperCase()}
 `;
 
@@ -491,7 +527,7 @@ ${detalle}
   if(btnPreset) btnPreset.addEventListener('click',()=>{ setPreset(); buildCustomSliders(); });
   trSel.addEventListener('change',()=>{ setPreset(); buildCustomSliders(); });
   presetSel.addEventListener('change',()=>{ setPreset(); buildCustomSliders(); });
-  btnCalc.addEventListener('click',calc);
+  document.getElementById('btnCalc').addEventListener('click',calc);
 
   // init
   state.weights = [15,30,55];
