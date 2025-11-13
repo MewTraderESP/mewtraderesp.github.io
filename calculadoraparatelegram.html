@@ -175,6 +175,7 @@ fetch("menu.html")
   <p class="subtitle">Entradas escalonadas <strong>15% / 30% / 55%</strong>. Calcula precio medio, riesgo y liquidación aprox. según capital, apalancamiento y riesgo máximo.</p>
 
   <div class="calcv2">
+    <!-- ===== ENTRADAS (sin cambios funcionales) ===== -->
     <section class="card">
       <div class="grid">
         <div class="col-6">
@@ -182,7 +183,6 @@ fetch("menu.html")
           <input id="capital" type="number" inputmode="decimal" step="0.01" value="4000"/>
         </div>
         <div class="col-3">
-          <!-- Cambiado solo el texto -->
           <label>Capital a usar (%)</label>
           <input id="riskPct" type="number" inputmode="decimal" step="0.1" value="1.5"/>
         </div>
@@ -264,7 +264,6 @@ fetch("menu.html")
         <div class="box">
           <h3>Riesgo objetivo</h3>
           <p id="kpiRisk">$0.00</p>
-          <!-- NUEVO: porcentajes de riesgo -->
           <small class="hint" id="kpiRiskPct">—% cuenta (—% de la operación)</small>
         </div>
         <div class="box"><h3>Precio medio</h3><p id="kpiAvg">—</p></div>
@@ -273,12 +272,63 @@ fetch("menu.html")
 
       <hr class="sep"/>
 
-      <!-- (se eliminaron los campos TP) -->
-
       <div class="row" style="margin-top:12px;justify-content:flex-end">
         <button class="btn" id="btnCopy">Copiar resultados</button>
       </div>
     </section>
+
+    <!-- ===== TAKE PROFITS (mismo look & feel que Entradas) ===== -->
+    <section class="card">
+      <div class="grid" style="margin-bottom:6px">
+        <div class="col-3">
+          <label>Nº de TPs</label>
+          <select id="tpCount">
+            <option>1</option>
+            <option selected>2</option>
+            <option>3</option>
+          </select>
+        </div>
+        <div class="col-6">
+          <label>Preset de distribución TP</label>
+          <select id="tpPreset">
+            <option value="equal" selected>Equitativo (50/50, 33/33/33…)</option>
+            <option value="153055">Progresivo 15/30/55</option>
+          </select>
+        </div>
+        <div class="col-3" style="display:flex;align-items:flex-end;justify-content:flex-end">
+          <small class="hint" id="tpBadge">Suma %: 0.00%</small>
+        </div>
+      </div>
+
+      <table class="table" id="tpTable">
+        <thead>
+          <tr>
+            <th>TP</th>
+            <th style="min-width:160px">Precio</th>
+            <th>% peso</th>
+            <th>Cantidad</th>
+            <th>PNL $</th>
+            <th>PNL acumulada $</th>
+            <th>RR acumulado</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+          <tr>
+            <td>Total</td>
+            <td></td>
+            <td id="tpWtSum">0%</td>
+            <td></td>
+            <td id="tpPnlTotal">$0.00</td>
+            <td></td>
+            <td id="tpRR">—</td>
+          </tr>
+        </tfoot>
+      </table>
+      <small class="hint" id="tpWarnings" style="display:block;margin-top:6px"></small>
+    </section>
+    <!-- ===== FIN TPs ===== -->
+
   </div>
 </div>
 
@@ -293,7 +343,7 @@ fetch("menu.html")
   const MMR_DEFAULT = 0.005;
 
   const capital   = $('#capital');
-  const riskPct   = $('#riskPct');   // % de capital a usar
+  const riskPct   = $('#riskPct');
   const sideSel   = $('#side');
   const trSel     = $('#tranches');
   const presetSel = $('#preset');
@@ -304,13 +354,28 @@ fetch("menu.html")
   const leverage  = $('#leverage');
   const customBox = $('#customWeights');
 
-  const kpiRisk = $('#kpiRisk');     // PÉRDIDA al SL global
-  const kpiRiskPct = $('#kpiRiskPct'); // NUEVO %s
+  const kpiRisk = $('#kpiRisk');
+  const kpiRiskPct = $('#kpiRiskPct');
   const kpiAvg  = $('#kpiAvg');
   const kpiLiq  = $('#kpiLiq');
 
-  const state = { weights: [], rows: [], snapshot:null };
+  // ===== TP elements
+  const tpCountSel   = $('#tpCount');
+  const tpPresetSel  = $('#tpPreset');
+  const tpTableBody  = $('#tpTable tbody');
+  const tpWtSumEl    = $('#tpWtSum');
+  const tpBadge      = $('#tpBadge');
+  const tpPnlTotalEl = $('#tpPnlTotal');
+  const tpRREl       = $('#tpRR');
+  const tpWarn       = $('#tpWarnings');
 
+  const state = {
+    weights: [], rows: [],
+    tpRows: [],       // {priceInput, weightInput, qtyCell, pnlCell, pnlCumCell, rrCell}
+    snapshot:null
+  };
+
+  /* ===== Entradas (igual que tenías) ===== */
   function updateWeightsBadge(){
     const sum = state.weights.reduce((a,b)=>a+b,0);
     const b = document.getElementById('weightsBadge');
@@ -345,8 +410,8 @@ fetch("menu.html")
     for(let i=0;i<n;i++){
       const wrap=document.createElement('div'); wrap.className='col-3';
       wrap.innerHTML = `<label>Tramo ${i+1} (%)</label>
-        <input type="range" min="0" max="100" step="1"  value="\${Math.round(state.weights[i]||0)}" data-k="\${i}">
-        <input type="number" min="0" max="100" step="0.1" value="\${(state.weights[i]||0).toFixed(1)}" data-k="\${i}" class="wNum">`;
+        <input type="range" min="0" max="100" step="1"  value="${Math.round(state.weights[i]||0)}" data-k="${i}">
+        <input type="number" min="0" max="100" step="0.1" value="${(state.weights[i]||0).toFixed(1)}" data-k="${i}" class="wNum">`;
       customBox.appendChild(wrap);
     }
 
@@ -394,13 +459,86 @@ fetch("menu.html")
     buildCustomSliders();
   }
 
+  /* ===== Take Profits ===== */
+
+  // Construye las filas de TP con inputs dentro de la tabla
+  function buildTpRows(){
+    const n = parseInt(tpCountSel.value,10);
+    tpTableBody.innerHTML = '';
+    state.tpRows = [];
+
+    for(let i=0;i<n;i++){
+      const tr = document.createElement('tr');
+
+      const c0 = document.createElement('td'); c0.textContent = `TP ${i+1}`;
+
+      const c1 = document.createElement('td');
+      c1.innerHTML = `<input type="number" step="0.0001" inputmode="decimal" class="tpPrice" placeholder="Precio">`;
+
+      const c2 = document.createElement('td');
+      c2.innerHTML = `<input type="number" step="0.1" inputmode="decimal" class="tpWeight" value="0">`;
+
+      const c3 = document.createElement('td'); c3.textContent = '—';
+      const c4 = document.createElement('td'); c4.textContent = '—';
+      const c5 = document.createElement('td'); c5.textContent = '—';
+      const c6 = document.createElement('td'); c6.textContent = '—';
+
+      tr.append(c0,c1,c2,c3,c4,c5,c6);
+      tpTableBody.appendChild(tr);
+
+      state.tpRows.push({
+        priceInput: c1.querySelector('input'),
+        weightInput: c2.querySelector('input'),
+        qtyCell: c3, pnlCell: c4, pnlCumCell: c5, rrCell: c6
+      });
+    }
+    updateTpPercentBadges();
+  }
+
+  // Aplica el preset sobre los % de la tabla (sin bloquear su edición)
+  function applyTpPresetToRows(){
+    const n = state.tpRows.length;
+    const mode = tpPresetSel.value;
+    let w = new Array(n).fill(0);
+    if(mode==='equal'){ w = w.map(()=>100/n); }
+    else if(mode==='153055'){ w = (n===1)?[100] : (n===2)?[40,60] : [15,30,55]; }
+
+    state.tpRows.forEach((row,i)=>{
+      row.weightInput.value = (w[i]||0).toFixed(2);
+    });
+    updateTpPercentBadges();
+  }
+
+  function updateTpPercentBadges(){
+    const raw = state.tpRows.map(r=> parseFloat(r.weightInput.value||'0'));
+    const sum = raw.reduce((a,b)=>a+b,0);
+    if (tpBadge)  tpBadge.textContent  = `Suma %: ${sum.toFixed(2)}%`;
+    if (tpWtSumEl) tpWtSumEl.textContent = fmtPct(sum);
+  }
+
+  // Lee % y precios escritos (sin modificar lo escrito)
+  function readTpInputs(){
+    const prices = state.tpRows.map(r => parseFloat(r.priceInput.value||'NaN'));
+    const weightsRaw = state.tpRows.map(r => clamp(parseFloat(r.weightInput.value||'0'),0,100));
+    return {prices, weightsRaw};
+  }
+
+  // Normaliza un vector de % para cálculo
+  function normalizePercentsTo1(raw){
+    const s = raw.reduce((a,b)=>a+b,0);
+    if(s<=0) return raw.map(()=> 1/raw.length);
+    return raw.map(x => x/s);
+  }
+
+  /* ===== Cálculo principal ===== */
   function calc(){
     const cap  = parseFloat(capital.value||'0');
-    const sizePct = parseFloat(riskPct.value||'0')/100; // % capital a usar (margen)
+    const sizePct = parseFloat(riskPct.value||'0')/100;
     const side = sideSel.value;
     const lev  = Math.max(1, parseFloat(leverage.value||'1'));
     const mmr  = 0.005;
 
+    // ---- Entradas
     const n = state.rows.length;
     let w = state.rows.map(r=> parseFloat(r.weight.value||'0'));
     let sumW = w.reduce((a,b)=>a+b,0);
@@ -412,33 +550,27 @@ fetch("menu.html")
     const sl = parseFloat(stopPrice.value||'NaN');
     if(!isFinite(sl)){ alert('Introduce un precio de Stop Loss global.'); return; }
 
-    // ✅ Capital a usar y exposición (no dependen del SL)
-    const capitalUsed      = cap * sizePct;     // margen
-    const positionNotional = capitalUsed * lev; // exposición
+    const capitalUsed      = cap * sizePct;
+    const positionNotional = capitalUsed * lev;
 
-    // Cantidades por tramo y notional
     const qty = prices.map((p,i)=> (positionNotional * w[i]) / p);
     const notionals = qty.map((q,i)=> q * prices[i]);
 
     const qtyTot = qty.reduce((a,b)=>a+b,0);
     const notTot = notionals.reduce((a,b)=>a+b,0);
-    const avg = qtyTot>0? (qty.reduce((s,q,i)=> s + q*prices[i],0) / qtyTot) : NaN;
+    const avg = qtyTot>0? (notTot / qtyTot) : NaN;
 
-    // Liquidación aprox.
     let liq = NaN;
     if(isFinite(avg)){
       liq = (side==='long') ? avg*(1 - 1/lev + mmr) : avg*(1 + 1/lev - mmr);
     }
 
-    // 🔻 Pérdida al tocar SL (depende de precios/SL)
     const slLossParts = prices.map((p,i)=> Math.abs(qty[i] * (p - sl)));
     const slLossTot   = slLossParts.reduce((a,b)=>a+b,0);
 
-    // 🔸 Asignación fija de "Riesgo $" por tramo = peso% * capitalUsado
     const riskAllocParts = w.map(wi => wi * capitalUsed);
-    const riskAllocTot   = riskAllocParts.reduce((a,b)=>a+b,0); // == capitalUsed
+    const riskAllocTot   = riskAllocParts.reduce((a,b)=>a+b,0);
 
-    // ⛔ Validación SL vs Liquidación
     if (isFinite(liq)) {
       const invalid = (side==='long' && sl < liq) || (side==='short' && sl > liq);
       if (invalid) {
@@ -446,22 +578,19 @@ fetch("menu.html")
       }
     }
 
-    // Render tabla
     state.rows.forEach((r,i)=>{
       r.weight.value = (w[i]*100).toFixed(2);
       r.notional.textContent = fmtUSD(notionals[i]);
       r.qty.textContent = isFinite(qty[i])? qty[i].toFixed(6) : '—';
-      r.risk.textContent = fmtUSD(riskAllocParts[i]);      // ← fijo por % capital usado
+      r.risk.textContent = fmtUSD(riskAllocParts[i]);
     });
     document.getElementById('wtSum').textContent   = fmtPct(w.reduce((a,b)=>a+b,0)*100);
     document.getElementById('notionalSum').textContent = fmtUSD(notTot);
     document.getElementById('qtySum').textContent  = isFinite(qtyTot)? qtyTot.toFixed(6) : '—';
     document.getElementById('riskSum').textContent = fmtUSD(riskAllocTot);
 
-    // KPI "Riesgo objetivo" = PÉRDIDA estimada al tocar SL
     kpiRisk.textContent = fmtUSD(slLossTot);
 
-    // NUEVO: % sobre cuenta y % sobre operación (margen)
     const riskPctAccount   = cap > 0 ? (slLossTot / cap) * 100 : 0;
     const riskPctOperation = capitalUsed > 0 ? (slLossTot / capitalUsed) * 100 : 0;
     if (kpiRiskPct) {
@@ -471,29 +600,99 @@ fetch("menu.html")
     kpiAvg.textContent  = isFinite(avg)? avg.toFixed(6) : '—';
     kpiLiq.textContent  = isFinite(liq)? liq.toFixed(6) : '—';
 
-    // Snapshot para copiar
+    // ---- TPs
+    const {prices: tpPrices, weightsRaw: tpRaw} = readTpInputs();
+    const tpN = state.tpRows.length;
+
+    // pintar sumas en badge/footer
+    updateTpPercentBadges();
+
+    if (tpPrices.length!==tpN || tpPrices.some(p=>!isFinite(p))){
+      // limpiar métricas si faltan datos
+      state.tpRows.forEach(r=>{
+        r.qtyCell.textContent = '—';
+        r.pnlCell.textContent = '—';
+        r.pnlCumCell.textContent = '—';
+        r.rrCell.textContent = '—';
+      });
+      tpPnlTotalEl.textContent = '$0.00';
+      tpRREl.textContent = '—';
+      tpWarn.textContent = '';
+      // snapshot base
+      state.snapshot = {
+        cap, riskPct: parseFloat(riskPct.value||'0'), side, n,
+        weights: w.map(x=> x*100), prices, sl,
+        qty, notionals, riskAllocParts, riskAllocTot,
+        slLossParts, slLossTot, qtyTot, notTot, avg, lev, mmr, liq,
+        risk: slLossTot, riskPctAccount, riskPctOperation, capitalUsed
+      };
+      return;
+    }
+
+    // validaciones TP vs avg
+    const warns=[];
+    tpPrices.forEach((p,i)=>{
+      if(side==='long' && isFinite(avg) && p<=avg) warns.push(`TP${i+1} ≤ precio medio (LONG).`);
+      if(side==='short'&& isFinite(avg) && p>=avg) warns.push(`TP${i+1} ≥ precio medio (SHORT).`);
+    });
+    tpWarn.textContent = warns.join(' ');
+
+    // normalización para cálculo
+    const tpNorm = normalizePercentsTo1(tpRaw);
+    const tpQty  = tpNorm.map(wi => qtyTot * wi);
+    const tpPnl  = tpPrices.map((p,i)=> (side==='long') ? (p - avg) * tpQty[i] : (avg - p) * tpQty[i]);
+
+    let cum=0;
+    const tpPnlCum = tpPnl.map(v => (cum+=v));
+    const tpRRs    = tpPnlCum.map(v => slLossTot>0 ? v / slLossTot : NaN);
+    const pnlTotal = tpPnl.reduce((a,b)=>a+b,0);
+    const rrGlobal = slLossTot>0 ? pnlTotal / slLossTot : NaN;
+
+    // pintar tabla: % muestra lo escrito, qty/PNL usan normalizados
+    state.tpRows.forEach((r,i)=>{
+      r.qtyCell.textContent     = isFinite(tpQty[i]) ? tpQty[i].toFixed(6) : '—';
+      r.pnlCell.textContent     = fmtUSD(tpPnl[i]);
+      r.pnlCumCell.textContent  = fmtUSD(tpPnlCum[i]);
+      r.rrCell.textContent      = isFinite(tpRRs[i])? tpRRs[i].toFixed(2) : '—';
+    });
+    tpPnlTotalEl.textContent = fmtUSD(pnlTotal);
+    tpRREl.textContent = isFinite(rrGlobal)? rrGlobal.toFixed(2) : '—';
+
+    // snapshot completo
     state.snapshot = {
-      cap,
-      riskPct: parseFloat(riskPct.value||'0'),
-      side, n,
+      cap, riskPct: parseFloat(riskPct.value||'0'), side, n,
       weights: w.map(x=> x*100), prices, sl,
-      qty, notionals,
-      riskAllocParts, riskAllocTot,
-      slLossParts, slLossTot,
-      qtyTot, notTot, avg, lev, mmr, liq,
-      risk: slLossTot,
-      riskPctAccount, riskPctOperation, capitalUsed
+      qty, notionals, riskAllocParts, riskAllocTot,
+      slLossParts, slLossTot, qtyTot, notTot, avg, lev, mmr, liq,
+      risk: slLossTot, riskPctAccount, riskPctOperation, capitalUsed,
+      tpCount: tpN,
+      tpWeightsRaw: tpRaw,
+      tpWeightsNormPct: tpNorm.map(x=> x*100),
+      tpPrices, tpQty, tpPnl, tpPnlCum,
+      tpPnlTotal: pnlTotal, tpRRs, tpRRGlobal: rrGlobal
     };
   }
 
-  // 📋 Copia formateada (Telegram-ready)
+  // Copia (sin cambios esenciales, añade datos TP si existen)
   function copyTelegram(){
     if(!state.snapshot){ alert('Calcula primero.'); return; }
     const s = state.snapshot;
 
     const detalle = Array.from({length: s.n}).map((_,i)=>{
-      return `• Tramo ${i+1}: precio ${s.prices[i]} · peso ${s.weights[i].toFixed(2)}% · qty ${s.qty[i].toFixed(6)} · asignación ${fmtUSD(s.riskAllocParts[i])} · pérdida al SL ${fmtUSD(s.slLossParts[i])}`;
+      return `• Tramo ${i+1}: precio ${s.prices[i]} · peso ${s.weights[i].toFixed(2)}% · qty ${(s.qty[i]||0).toFixed(6)} · asignación ${fmtUSD(s.riskAllocParts[i])} · pérdida al SL ${fmtUSD(s.slLossParts[i])}`;
     }).join('\n');
+
+    let detalleTP = '';
+    if (s.tpPrices && s.tpPrices.length){
+      detalleTP = '\n🎯 *Take Profits:*\n' + s.tpPrices.map((p,i)=>{
+        const wRaw = s.tpWeightsRaw ? s.tpWeightsRaw[i] : (s.tpWeightsNormPct? s.tpWeightsNormPct[i] : (100/s.tpPrices.length));
+        const q = s.tpQty ? s.tpQty[i] : 0;
+        const pnl = s.tpPnl ? s.tpPnl[i] : 0;
+        const pc = s.tpPnlCum ? s.tpPnlCum[i] : 0;
+        const rr = s.tpRRs ? s.tpRRs[i] : NaN;
+        return `• TP${i+1}: precio ${p} · % escrito ${Number(wRaw).toFixed(2)}% · qty ${q.toFixed(6)} · PNL ${fmtUSD(pnl)} · PNL acum ${fmtUSD(pc)} · RR ${isFinite(rr)?rr.toFixed(2):'—'}`;
+      }).join('\n') + `\n🧮 *PNL Global TP:* ${fmtUSD(s.tpPnlTotal||0)} · *RR Global:* ${isFinite(s.tpRRGlobal)? s.tpRRGlobal.toFixed(2) : '—'}`;
+    }
 
     const slLong  = (s.side==='long')  ? String(s.sl) : '—';
     const slShort = (s.side==='short') ? String(s.sl) : '—';
@@ -504,12 +703,13 @@ fetch("menu.html")
 💠 *Precio Promedio:* ${isFinite(s.avg)? s.avg.toFixed(6) : '—'}
 
 ${detalle}
+${detalleTP}
 
 🛡️ *Stop Loss (LONG):* ${slLong}
 ⚔️ *Stop Loss (SHORT):* ${slShort}
 
 🎯 *Capital a usar:* ${s.riskPct.toFixed(2)}%  (total ${fmtUSD(s.capitalUsed || s.riskAllocTot)})
-💰 *Pérdida al tocar SL:* ${fmtUSD(s.risk)} — ${ (s.riskPctAccount||0).toFixed(2)}% cuenta (${ (s.riskPctOperation||0).toFixed(2)}% de la operación)
+💰 *Pérdida al tocar SL:* ${fmtUSD(s.risk)} — ${(s.riskPctAccount||0).toFixed(2)}% cuenta (${(s.riskPctOperation||0).toFixed(2)}% de la operación)
 🔧 *Apalancamiento:* x${s.lev.toFixed(2)} · *Dirección:* ${s.side.toUpperCase()}
 `;
 
@@ -523,28 +723,31 @@ ${detalle}
     });
   }
 
+  // Listeners
   document.getElementById('btnCopy').addEventListener('click', copyTelegram);
   if(btnPreset) btnPreset.addEventListener('click',()=>{ setPreset(); buildCustomSliders(); });
   trSel.addEventListener('change',()=>{ setPreset(); buildCustomSliders(); });
   presetSel.addEventListener('change',()=>{ setPreset(); buildCustomSliders(); });
   document.getElementById('btnCalc').addEventListener('click',calc);
 
-  // init
+  // TP listeners
+  tpCountSel.addEventListener('change',()=>{ buildTpRows(); applyTpPresetToRows(); });
+  tpPresetSel.addEventListener('change',()=>{ applyTpPresetToRows(); });
+  // Los inputs de TP no se “autonormalizan”; solo actualizamos sumas visuales
+  tpTableBody.addEventListener('input', (e)=>{
+    if(e.target.classList.contains('tpPrice') || e.target.classList.contains('tpWeight')){
+      updateTpPercentBadges();
+    }
+  });
+
+  // init entradas
   state.weights = [15,30,55];
   setPreset();
-})();
-</script>
 
-<!-- ===== Frase del día ===== -->
-<script>
-fetch("frases.json")
-  .then(r=>r.json())
-  .then(d=>{
-    const frases=d.frases||[];
-    const frase=frases[Math.floor(Math.random()*frases.length)]||"Piensa fuera de la caja.";
-    document.getElementById("frase-dia").textContent=frase;
-  })
-  .catch(()=>document.getElementById("frase-dia").textContent="Piensa fuera de la caja.");
+  // init TP (2 TPs equitativo)
+  buildTpRows();
+  applyTpPresetToRows();
+})();
 </script>
 </body>
 </html>
